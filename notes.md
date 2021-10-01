@@ -32,3 +32,4 @@ depl = %DeployUtils{app_name: "watchex", app_image: "watchex:0.1.4_dev"}
 } 
 
 - checking webhook
+- test
