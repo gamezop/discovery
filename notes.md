@@ -30,3 +30,15 @@ depl = %DeployUtils{app_name: "watchex", app_image: "watchex:0.1.4_dev"}
   app_image: "madclaws/watchex:0.1.4_dev",
   app_name: "watchex"
 } 
+
+## 2022-05-25 11:32:44
+
+### MVP roadmap
+
+- [PROBLEM]Inconsistency in connecting to remote k8s locally via kube config file
+
+1. Authentication using service account.
+  - Try to connect locally to dev k8s.
+2. Deploying to dev, integrating with tic-tac-toe.
+3  Create, delete deployment api.
+4. Deploying to prod with tictactoe.
