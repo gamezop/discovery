@@ -6,7 +6,7 @@ metadata:
 spec:
   ports:
   - port: 80
-    targetPort: 4000
+    targetPort: 3245
     protocol: TCP
     name: APP_NAME-service-port
   selector:

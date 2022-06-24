@@ -42,3 +42,43 @@ depl = %DeployUtils{app_name: "watchex", app_image: "watchex:0.1.4_dev"}
 2. Deploying to dev, integrating with tic-tac-toe.
 3  Create, delete deployment api.
 4. Deploying to prod with tictactoe.
+
+
+## service account token
+
+k get serviceaccount -n namespace
+
+Add cluster role binding
+`kubectl create clusterrolebinding cluster-system-anonymous --clusterrole=cluster-admin --user=system:anonymous`
+
+<!-- in container
+`k exec enterprise-93720964-648dcc5d4f-c9x6r -n discovery -- cat /var/run/secrets/kubernetes.io/serviceaccount/token` -->
+
+or;
+`k get secret -n namespace`
+`k describe secrets default-token-ch4bm -n namespace`
+
+
+kubectl get secret $secret -o yaml | grep "token:" | awk {'print $2'} |  base64 -d > token
+[token] is base64 encoding of jwt present as secret k8s
+curl -v -k -H --cacert ~/.minikube/ca.crt -H "Authorization: Bearer $(cat ~/[token])"  "https://192.168.49.2:8443/api/v1/pods" 
+
+## k8s client 
+  client v1.1.5 has apply, build etc apis but
+  k8s apply calls this  `K8s.Operation.build(:apply, "/home/ghostdsb/Documents/gamezop/discoveryminikube/discovery/enterprise/ingress.yml", [field_manager: "elixir", force: true])`
+
+## instead of kubectl in container, use http api 
+
+  to use kubectl commands in container we have to install kubectl in container.
+  we can install curl instead and hit k8s api
+  prerequisites
+    - serviceaccount
+    - role and role binding for service account
+  
+
+https://stackoverflow.com/questions/42642170/how-to-run-kubectl-commands-inside-a-container
+
+## delete deployment
+
+ k get deployment -n discovery
+ k delete deployment <name> -n discovery

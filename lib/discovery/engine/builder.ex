@@ -26,6 +26,14 @@ defmodule Discovery.Engine.Builder do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
 
+  def get_state do
+    GenServer.call(__MODULE__, "get-state")
+  end
+
+  def get_conn do
+    GenServer.call(__MODULE__, "get-conn")
+  end
+
   ## Server callbacks ##
   @impl true
   def init(_init_arg) do
@@ -40,6 +48,16 @@ defmodule Discovery.Engine.Builder do
   end
 
   @impl true
+  def handle_call("get-state", _from, state) do
+    {:reply, state, state}
+  end
+
+  @impl true
+  def handle_call("get-conn", _from, state) do
+    {:reply, state.conn_ref, state}
+  end
+
+  @impl true
   def handle_info("fetch_deployment_data", state) do
     updated_state = build_metadata(state)
     Process.send_after(self(), "fetch_deployment_data", @k8_fetch_interval)
@@ -51,7 +69,8 @@ defmodule Discovery.Engine.Builder do
   # Connects to Kubernetes
   @spec connect_to_k8() :: any()
   defp connect_to_k8 do
-    case K8s.Conn.from_file("~/.kube/config", context: "minikube") do
+    case K8s.Conn.from_service_account() do
+      # case K8s.Conn.from_file("~/.kube/config", context: "minikube") do
       {:ok, conn_ref} ->
         Logger.info("K8 connection success")
         conn_ref
@@ -101,10 +120,17 @@ defmodule Discovery.Engine.Builder do
 
   defp update_metadata_db([deployment | t], state) do
     app_id = deployment["metadata"]["annotations"]["app_id"]
-    # Logger.info("APP_ID: #{app_id}")
 
-    update_app_metadata(app_id, deployment, state)
-    |> then(&update_metadata_db(t, &1))
+    # discovery app is also deployed in the namespace hence skipping it
+    deployment["metadata"]["name"]
+    |> case do
+      "discovery" ->
+        update_metadata_db(t, state)
+
+      _ ->
+        update_app_metadata(app_id, deployment, state)
+        |> then(fn updated_state -> update_metadata_db(t, updated_state) end)
+    end
   end
 
   # @docp """
@@ -155,23 +181,47 @@ defmodule Discovery.Engine.Builder do
   @spec get_deployment_url(String.t(), K8s.Conn.t()) :: String.t()
   defp get_deployment_url(app_deployment_name, connection) do
     # app deployment names are always in a format [app_id]-[serial-id]
-    [app_id, path] = app_deployment_name |> String.split("-")
+    case app_deployment_name |> String.split("-") do
+      [app_id, path] ->
+        ingress_response =
+          K8s.Client.get("extensions/v1beta1", "ingress",
+            namespace: "discovery",
+            name: app_id
+          )
+          |> then(&K8s.Client.run(connection, &1))
 
-    ingress_response =
-      K8s.Client.get("extensions/v1beta1", "ingress",
-        namespace: "discovery",
-        name: app_id
-      )
-      |> then(&K8s.Client.run(connection, &1))
+        case ingress_response do
+          {:ok, ingress_data} ->
+            [rule | _rules] = ingress_data["spec"]["rules"]
+            "#{rule["host"]}/#{path}"
 
-    case ingress_response do
-      {:ok, ingress_data} ->
-        [rule | _rules] = ingress_data["spec"]["rules"]
-        "#{rule["host"]}/#{path}"
+          {:error, reason} ->
+            IO.puts("Error on fetching ingress, due to #{inspect(reason)}")
+            ""
+        end
 
-      {:error, reason} ->
-        IO.puts("Error on fetching ingress, due to #{inspect(reason)}")
+      _ ->
         ""
     end
+
+    # # app deployment names are always in a format [app_id]-[serial-id]
+    # [app_id, path] = app_deployment_name |> String.split("-")
+
+    # ingress_response =
+    #   K8s.Client.get("extensions/v1beta1", "ingress",
+    #     namespace: "discovery",
+    #     name: app_id
+    #   )
+    #   |> then(&K8s.Client.run(connection, &1))
+
+    # case ingress_response do
+    #   {:ok, ingress_data} ->
+    #     [rule | _rules] = ingress_data["spec"]["rules"]
+    #     "#{rule["host"]}/#{path}"
+
+    #   {:error, reason} ->
+    #     IO.puts("Error on fetching ingress, due to #{inspect(reason)}")
+    #     ""
+    # end
   end
 end

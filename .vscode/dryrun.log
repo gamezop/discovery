@@ -1,0 +1,9 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/ghostdsb/Documents/gamezop/discovery'
+mix test
+mix format
+mix credo --strict
+git add .
+git cz
+make: Leaving directory '/home/ghostdsb/Documents/gamezop/discovery'
+ 

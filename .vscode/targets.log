@@ -1,0 +1,424 @@
+make all --print-data-base --no-builtin-variables --no-builtin-rules --question
+make: *** No rule to make target 'all'.  Stop.
+
+# GNU Make 4.2.1
+# Built for x86_64-pc-linux-gnu
+# Copyright (C) 1988-2016 Free Software Foundation, Inc.
+# License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
+
+# Make data base, printed on Fri Jun 24 21:37:52 2022
+
+# Variables
+
+# 'override' directive
+GNUMAKEFLAGS := 
+# automatic
+<D = $(patsubst %/,%,$(dir $<))
+# automatic
+?F = $(notdir $?)
+# environment
+PAPERSIZE = a4
+# environment
+AWS_SECRET_ACCESS_KEY = xl51cZsWFknevUeiFb83zqSv1xSlpEy9vWiLiOw2
+# environment
+DESKTOP_SESSION = regolith
+# default
+.SHELLFLAGS := -c
+# environment
+XDG_SESSION_CLASS = user
+# environment
+SPICETIFY_INSTALL = /home/ghostdsb/spicetify-cli
+# environment
+XDG_SESSION_TYPE = x11
+# environment
+VSCODE_LOG_NATIVE = false
+# automatic
+?D = $(patsubst %/,%,$(dir $?))
+# automatic
+@D = $(patsubst %/,%,$(dir $@))
+# environment
+XAUTHORITY = /run/user/1000/gdm/Xauthority
+# environment
+GDMSESSION = regolith
+# environment
+XMODIFIERS = @im=ibus
+# makefile
+CURDIR := /home/ghostdsb/Documents/gamezop/discovery
+# makefile
+SHELL = /bin/sh
+# environment
+VTE_VERSION = 6003
+# environment
+VSCODE_NLS_CONFIG = {"locale":"en-us","availableLanguages":{},"_languagePackSupport":true}
+# environment
+_ = /usr/bin/code
+# makefile (from 'makefile', line 1)
+VERSION_DEV = 0.1.28
+# environment
+XDG_CONFIG_DIRS = /etc/xdg/xdg-regolith:/etc/xdg
+# makefile (from 'makefile', line 1)
+MAKEFILE_LIST :=  makefile
+# automatic
+@F = $(notdir $@)
+# environment
+GIO_LAUNCHED_DESKTOP_FILE = /usr/share/applications/regolith.desktop
+# environment
+USERNAME = ghostdsb
+# environment
+MAKELEVEL := 0
+# environment
+MANDATORY_PATH = /usr/share/gconf/regolith.mandatory.path
+# environment
+XDG_DATA_DIRS = /usr/share/regolith:/home/ghostdsb/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share/:/usr/share/:/var/lib/snapd/desktop
+# environment
+DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/1000/bus
+# environment
+VSCODE_VERBOSE_LOGGING = true
+# environment
+TERMINATOR_UUID = urn:uuid:04972e49-2bad-455b-a25c-2c023467124e
+# environment
+VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-3c2f410d-9115-4874-9ef5-2b6b890dacbb.sock
+# environment
+AWS_DEFAULT_REGION = ap-south-1
+# environment
+LC_NAME = en_IN.UTF-8
+# environment
+VSCODE_CWD = /home/ghostdsb/Documents/gamezop/discovery
+# default
+MAKE_HOST := x86_64-pc-linux-gnu
+# environment
+PATH = /home/ghostdsb/spicetify-cli:/home/ghostdsb/.cabal/bin:/home/ghostdsb/.ghcup/bin:/home/ghostdsb/.asdf/shims:/home/ghostdsb/.asdf/bin:/home/ghostdsb/.local/share/solana/install/active_release/bin:/home/ghostdsb/.cargo/bin:/home/ghostdsb/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+# environment
+GPG_AGENT_INFO = /run/user/1000/gnupg/S.gpg-agent:0:1
+# environment
+LSCOLORS = Gxfxcxdxbxegedabagacad
+# environment
+SESSION_MANAGER = local/titan:@/tmp/.ICE-unix/4660,unix/titan:/tmp/.ICE-unix/4660
+# environment
+XDG_RUNTIME_DIR = /run/user/1000
+# environment
+LC_ALL = C
+# environment
+XDG_MENU_PREFIX = gnome-flashback-
+# environment
+VSCODE_LOG_STACK = false
+# environment
+ELECTRON_RUN_AS_NODE = 1
+# default
+.FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell archives jobserver output-sync check-symlink load
+# environment
+ELECTRON_NO_ATTACH_CONSOLE = 1
+# environment
+LS_COLORS = rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:
+# environment
+XDG_SESSION_DESKTOP = regolith
+# environment
+SSH_AUTH_SOCK = /run/user/1000/keyring/ssh
+# environment
+GIO_LAUNCHED_DESKTOP_FILE_PID = 4942
+# automatic
+%F = $(notdir $%)
+# environment
+DISPLAY = :1
+# environment
+VSCODE_PIPE_LOGGING = true
+# environment
+PWD = /home/ghostdsb/Documents/gamezop/discovery
+# default
+.LOADED := 
+# environment
+SSH_AGENT_PID = 4768
+# environment
+ORIGINAL_XDG_CURRENT_DESKTOP = Regolith:GNOME-Flashback:GNOME
+# environment
+GTK_MODULES = gail:atk-bridge
+# environment
+DEADPOOL_DB_URL = postgres://postgres:postgres@172.17.0.1/deadpool_dev
+# environment
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
+# environment
+HOME = /home/ghostdsb
+# environment
+GIT_TERMINAL_PROMPT = 1
+# environment
+VSCODE_CLI = 1
+# environment
+VSCODE_CODE_CACHE_PATH = /home/ghostdsb/.config/Code/CachedData/30d9c6cd9483b2cc586687151bcbcd635f373630
+# environment
+LOGNAME = ghostdsb
+# environment
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
+# automatic
++F = $(notdir $+)
+# environment
+ZSH = /home/ghostdsb/.oh-my-zsh
+# environment
+VSCODE_HANDLES_UNCAUGHT_ERRORS = true
+# environment
+GNOME_DESKTOP_SESSION_ID = this-is-deprecated
+# automatic
+^D = $(patsubst %/,%,$(dir $^))
+# environment
+TEST = zero
+# environment
+SECRET_KEY_BASE = RL7hDHGGL2lkkXp6nBNFlgeco60bsEsHboIdClK7/sHhf8PEO5JrYlR4hRxayAdA
+# environment
+LC_TIME = en_IN.UTF-8
+# environment
+COLORTERM = truecolor
+# default
+MAKE = $(MAKE_COMMAND)
+# default
+MAKECMDGOALS := all
+# environment
+QT_IM_MODULE = ibus
+# environment
+SHLVL = 2
+# environment
+COMPIZ_CONFIG_PROFILE = gnome-flashback
+# default
+MAKE_VERSION := 4.2.1
+# environment
+USER = ghostdsb
+# environment
+LC_MONETARY = en_IN.UTF-8
+# makefile
+.DEFAULT_GOAL := commit
+# environment
+XDG_CURRENT_DESKTOP = Regolith:GNOME-Flashback:GNOME
+# environment
+GITHUB_ACCESS_TOKEN = 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
+# environment
+LESS = -R
+# automatic
+%D = $(patsubst %/,%,$(dir $%))
+# environment
+LC_TELEPHONE = en_IN.UTF-8
+# environment
+I3SOCK = /run/user/1000/i3/ipc-socket.5080
+# default
+MAKE_COMMAND := make
+# environment
+TERMINATOR_DBUS_PATH = /net/tenshu/Terminator2
+# default
+.VARIABLES := 
+# automatic
+*F = $(notdir $*)
+# environment
+VSCODE_IPC_HOOK = /run/user/1000/vscode-fc687d7c-1.68.1-main.sock
+# makefile
+MAKEFLAGS = pqrR
+# environment
+MFLAGS = -pqrR
+# automatic
+*D = $(patsubst %/,%,$(dir $*))
+# automatic
++D = $(patsubst %/,%,$(dir $+))
+# environment
+GDK_BACKEND = x11
+# environment
+LC_PAPER = en_IN.UTF-8
+# environment
+QT_ACCESSIBILITY = 1
+# environment
+DESKTOP_AUTOSTART_ID = 105adc606710a39ea3165608660334876100000046600016
+# environment
+DEFAULTS_PATH = /usr/share/gconf/regolith.default.path
+# default
+MAKEFILES := 
+# makefile (from 'makefile', line 2)
+VERSION_PROD = 0.1.0
+# environment
+LC_NUMERIC = en_IN.UTF-8
+# automatic
+<F = $(notdir $<)
+# environment
+LC_MEASUREMENT = en_IN.UTF-8
+# environment
+PAGER = less
+# environment
+AWS_ACCESS_KEY_ID = AKIA5KTKFYWNZTXAUNFI
+# environment
+ADMIN_SERVICE_BASE_URL = http://localhost:4001
+# automatic
+^F = $(notdir $^)
+# default
+SUFFIXES := 
+# environment
+ASDF_DIR = /home/ghostdsb/.asdf
+# environment
+CHROME_DESKTOP = code-url-handler.desktop
+# environment
+WINDOWPATH = 2
+# default
+.INCLUDE_DIRS = /usr/include /usr/local/include /usr/include
+# environment
+LC_IDENTIFICATION = en_IN.UTF-8
+# default
+.RECIPEPREFIX := 
+# environment
+LC_ADDRESS = en_IN.UTF-8
+# environment
+GIT_SSH_COMMAND = /usr/bin/ssh -i ~/.ssh/id_rsa
+# environment
+LANG = C
+# environment
+TERM = xterm-256color
+# environment
+TERMINATOR_DBUS_NAME = net.tenshu.Terminator23558193cd9818af7fe4d2c2f5bd9d00f
+# environment
+VSCODE_PID = 18447
+# variable set hash-table stats:
+# Load=129/1024=13%, Rehash=0, Collisions=18/154=12%
+
+# Pattern-specific Variable Values
+
+# No pattern-specific variable values.
+
+# Directories
+
+# . (device 2051, inode 23469389): 29 files, no impossibilities.
+
+# 29 files, no impossibilities in 1 directories.
+ 
+
+# Implicit Rules
+
+# No implicit rules.
+
+# Files
+
+# Not a target:
+all:
+#  Command line target.
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has not been updated.
+
+dev-release:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'makefile', line 36):
+	mix deps.get
+	mix compile
+	mix release
+
+rundockerdev: builddockerdev
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'makefile', line 59):
+	docker run --name discovery-$(VERSION_DEV) --publish 6966:6966 --detach --env DISCOVERY_PORT=6966 \
+	--env SECRET_KEY_BASE=${SECRET_KEY_BASE} gamezop/discovery:$(VERSION_DEV)
+
+commit:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'makefile', line 5):
+	mix test
+	mix format
+	mix credo --strict
+	git add .
+	git cz
+
+rundockerprod:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'makefile', line 55):
+	docker run --name discovery-$(VERSION_PROD) --publish 6968:6968 --detach --env DISCOVERY_PORT=6968 \
+	--env SECRET_KEY_BASE=${SECRET_KEY_BASE} gamezop/discovery:$(VERSION_PROD)
+
+commit-release-patch:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'makefile', line 28):
+	mix bump_release patch
+	mix test
+	mix format
+	mix credo --strict
+	git add .
+	git cz
+
+# Not a target:
+makefile:
+#  Implicit rule search has been done.
+#  Last modified 2022-06-24 19:49:09.345864304
+#  File has been updated.
+#  Successfully updated.
+
+commit-release-major:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'makefile', line 12):
+	mix bump_release major
+	mix test
+	mix format
+	mix credo --strict
+	git add .
+	git cz
+
+# Not a target:
+.DEFAULT:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+pushdockerdev: builddockerdev
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'makefile', line 49):
+	docker push gamezop/discovery:$(VERSION_DEV)
+
+builddockerdev:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'makefile', line 45):
+	docker build --file dev.Dockerfile --tag gamezop/discovery .
+	docker tag gamezop/discovery gamezop/discovery:$(VERSION_DEV)
+
+builddockerprod:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'makefile', line 41):
+	docker build --tag gamezop/discovery .
+	docker tag gamezop/discovery gamezop/discovery:$(VERSION_PROD)
+
+commit-release-minor:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'makefile', line 20):
+	mix bump_release minor
+	mix test
+	mix format
+	mix credo --strict
+	git add .
+	git cz
+
+# files hash-table stats:
+# Load=14/1024=1%, Rehash=0, Collisions=0/26=0%
+# VPATH Search Paths
+
+# No 'vpath' search paths.
+
+# No general ('VPATH' variable) search path.
+
+# strcache buffers: 1 (0) / strings = 44 / storage = 473 B / avg = 10 B
+# current buf: size = 8162 B / used = 473 B / count = 44 / avg = 10 B
+
+# strcache performance: lookups = 60 / hit rate = 26%
+# hash-table stats:
+# Load=44/8192=1%, Rehash=0, Collisions=1/60=2%
+# Finished Make data base on Fri Jun 24 21:37:52 2022
+
+ 

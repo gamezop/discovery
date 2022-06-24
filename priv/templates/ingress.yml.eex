@@ -8,6 +8,6 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   rules:
-  - host: APP_NAME.minikube.com
+  - host: dev-enterprisek8.skillclash.com
     http:
       paths:

@@ -3,6 +3,7 @@ defmodule Discovery.Deploy.DeployUtils do
   Includes handles all the utilities for CRUD operations of app deployments
   """
   alias Discovery.Deploy.DeployUtils
+  alias Discovery.Engine.Builder
   alias Discovery.Utils
 
   @root_dir "minikube/discovery/"
@@ -55,10 +56,10 @@ defmodule Discovery.Deploy.DeployUtils do
       Utils.puts_warn("NAMESPACE DIRECTORY EXISTS")
     else
       File.mkdir_p!(Path.dirname("minikube/discovery/namespace.yml"))
-      namespace_template = File.read!("priv/templates/namespace.yml.eex")
+      namespace_template = File.read!("#{:code.priv_dir(:discovery)}/templates/namespace.yml.eex")
       File.write!("minikube/discovery/namespace.yml", namespace_template)
       Utils.puts_warn("RUNNING NAMESPACE: discovery")
-      run_resource(["apply", "-f", File.cwd!() <> "/minikube/discovery/namespace.yml"])
+      # run_resource(File.cwd!() <> "/minikube/discovery/namespace.yml")
     end
   end
 
@@ -69,17 +70,17 @@ defmodule Discovery.Deploy.DeployUtils do
 
   @spec create_ingress(status :: :ok | {:error, term()}, app()) :: :ok | {:error, term()}
   defp create_ingress(:ok, app) do
-    ingress_file = get_ingress_file_path(app)
+    {app_type, ingress_file} = get_ingress_file_path(app)
 
-    with {:ok, ingress_template} <- File.read(ingress_file),
-         :ok <- write_to_ingress(ingress_template, app),
-         do: :ok
+    with {:ok, ingress_template} <- File.read(ingress_file) do
+      write_to_ingress(app_type, ingress_template, app)
+    end
   end
 
   defp create_ingress(error, _app), do: error
 
-  @spec write_to_ingress(binary(), app()) :: :ok | {:error, term()}
-  defp write_to_ingress(ingress_template, app) do
+  @spec write_to_ingress(atom(), binary(), app()) :: :ok | {:error, term()}
+  defp write_to_ingress(app_type, ingress_template, app) do
     ingress_out =
       String.replace(ingress_template, "APP_NAME", app.app_name)
       |> String.replace("UID", app.uid)
@@ -91,11 +92,11 @@ defmodule Discovery.Deploy.DeployUtils do
         update_ingress_paths(app)
         Utils.puts_warn("RUNNING INGRESS: #{app.app_name}")
 
-        run_resource([
-          "apply",
-          "-f",
-          File.cwd!() <> "/minikube/discovery/#{app.app_name}/ingress.yml"
-        ])
+        if app_type == :old_app do
+          patch_resource(File.cwd!() <> "/minikube/discovery/#{app.app_name}/ingress.yml")
+        else
+          run_resource(File.cwd!() <> "/minikube/discovery/#{app.app_name}/ingress.yml")
+        end
 
       error ->
         error
@@ -126,11 +127,11 @@ defmodule Discovery.Deploy.DeployUtils do
     """
   end
 
-  @spec get_ingress_file_path(app()) :: String.t()
+  @spec get_ingress_file_path(app()) :: {atom(), String.t()}
   defp get_ingress_file_path(app) do
     case File.exists?("minikube/discovery/#{app.app_name}/ingress.yml") do
-      true -> "minikube/discovery/#{app.app_name}/ingress.yml"
-      _ -> "priv/templates/ingress.yml.eex"
+      true -> {:old_app, "minikube/discovery/#{app.app_name}/ingress.yml"}
+      _ -> {:new_app, "#{:code.priv_dir(:discovery)}/templates/ingress.yml.eex"}
     end
   end
 
@@ -151,9 +152,10 @@ defmodule Discovery.Deploy.DeployUtils do
 
   @spec create_configmap(app()) :: :ok | {:error, term()}
   defp create_configmap(app) do
-    with {:ok, config_template} <- File.read("priv/templates/configmap.yml.eex"),
-         :ok <- write_to_configmap(config_template, app),
-         do: :ok
+    with {:ok, config_template} <-
+           File.read("#{:code.priv_dir(:discovery)}/templates/configmap.yml.eex") do
+      write_to_configmap(config_template, app)
+    end
   end
 
   @spec write_to_configmap(String.t(), app()) :: :ok | {:error, term()}
@@ -171,12 +173,10 @@ defmodule Discovery.Deploy.DeployUtils do
         File.close(configmap_io)
         Utils.puts_warn("RUNNING CONFIGMAP: #{app.app_name}-#{app.uid}")
 
-        run_resource([
-          "apply",
-          "-f",
+        run_resource(
           File.cwd!() <>
             "/minikube/discovery/#{app.app_name}/#{app.app_name}-#{app.uid}/configmap.yml"
-        ])
+        )
 
       error ->
         error
@@ -185,9 +185,10 @@ defmodule Discovery.Deploy.DeployUtils do
 
   @spec create_deploy_yml(app()) :: :ok | {:error, term()}
   defp create_deploy_yml(app) do
-    with {:ok, deploy_template} <- File.read("priv/templates/deploy.yml.eex"),
-         :ok <- write_to_deploy_yml(deploy_template, app),
-         do: :ok
+    with {:ok, deploy_template} <-
+           File.read("#{:code.priv_dir(:discovery)}/templates/deploy.yml.eex") do
+      write_to_deploy_yml(deploy_template, app)
+    end
   end
 
   @spec write_to_deploy_yml(String.t(), app()) :: :ok | {:error, term()}
@@ -206,12 +207,10 @@ defmodule Discovery.Deploy.DeployUtils do
         File.close(deploy_io)
         Utils.puts_warn("RUNNING DEPLOYMENT: #{app.app_name}-#{app.uid}")
 
-        run_resource([
-          "apply",
-          "-f",
+        run_resource(
           File.cwd!() <>
             "/minikube/discovery/#{app.app_name}/#{app.app_name}-#{app.uid}/deploy.yml"
-        ])
+        )
 
       error ->
         error
@@ -220,9 +219,10 @@ defmodule Discovery.Deploy.DeployUtils do
 
   @spec create_service(app()) :: :ok | {:error, term()}
   defp create_service(app) do
-    with {:ok, service_template} <- File.read("priv/templates/service.yml.eex"),
-         :ok <- write_to_service(service_template, app),
-         do: :ok
+    with {:ok, service_template} <-
+           File.read("#{:code.priv_dir(:discovery)}/templates/service.yml.eex") do
+      write_to_service(service_template, app)
+    end
   end
 
   @spec write_to_service(String.t(), app()) :: :ok | {:error, term()}
@@ -240,31 +240,41 @@ defmodule Discovery.Deploy.DeployUtils do
         File.close(service_io)
         Utils.puts_warn("RUNNING SERVICE: #{app.app_name}-#{app.uid}")
 
-        run_resource([
-          "apply",
-          "-f",
+        run_resource(
           File.cwd!() <>
             "/minikube/discovery/#{app.app_name}/#{app.app_name}-#{app.uid}/service.yml"
-        ])
+        )
 
       error ->
         error
     end
   end
 
-  @spec run_resource(list()) :: :ok | {:error, term()}
-  defp run_resource(command) do
-    case System.cmd("kubectl", command) do
-      {output, 0} ->
-        Utils.puts_success(output)
+  @spec run_resource(String.t()) :: :ok | {:error, term()}
+  defp run_resource(resource) do
+    conn = Builder.get_conn()
+    deployment = K8s.Resource.from_file!(resource)
+    # |> IO.inspect(label: "deployment")
+    operation = K8s.Client.create(deployment)
+    # |> IO.inspect(label: "apply")
+    K8s.Client.run(conn, operation)
+    # |> IO.inspect(label: "run apply operation")
+    Utils.puts_success(resource)
+    # |> IO.inspect(label: "success")
+  end
 
-      {error, 1} ->
-        Utils.puts_error(error)
-        {:error, error}
-
-      _ ->
-        Utils.puts_error("Unknown error")
-        {:error, "Unknown error"}
-    end
+  @spec patch_resource(String.t()) :: :ok | {:error, term()}
+  defp patch_resource(resource) do
+    conn = Builder.get_conn()
+    deployment = K8s.Resource.from_file!(resource)
+    # |> IO.inspect(label: "deployment")
+    operation = K8s.Client.apply(deployment)
+    # |> IO.inspect(label: "apply")
+    # operation = K8s.Client.create(deployment)
+    # |> IO.inspect(label: "apply")
+    K8s.Client.run(conn, operation)
+    # |> IO.inspect(label: "run apply operation")
+    Utils.puts_success(resource)
+    # |> IO.inspect(label: "success")
   end
 end

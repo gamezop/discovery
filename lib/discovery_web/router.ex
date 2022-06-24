@@ -7,6 +7,7 @@ defmodule DiscoveryWeb.Router do
     plug :fetch_live_flash
     plug :put_root_layout, {DiscoveryWeb.LayoutView, :root}
     plug :protect_from_forgery
+    plug CORSPlug, origin: "*"
     plug :put_secure_browser_headers
   end
 

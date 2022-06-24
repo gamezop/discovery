@@ -20,11 +20,12 @@ spec:
       labels:
         app: APP_NAME-UID
     spec:
+      serviceAccountName: discovery-sa
       containers:
       - name: APP_NAME
         image: APP_IMAGE
         ports:
-        - containerPort: 4000
+        - containerPort: 3245
           protocol: TCP
           name: APP_NAME-port
         resources:
@@ -37,3 +38,5 @@ spec:
         envFrom:
         - configMapRef:
             name: APP_NAME-UID
+      imagePullSecrets:
+      - name: dockerhub-auth-discovery

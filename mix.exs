@@ -35,10 +35,10 @@ defmodule Discovery.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.5.9"},
-      {:phoenix_live_view, "~> 0.15.1"},
+      {:phoenix, "~> 1.6.0"},
+      {:phoenix_live_view, "~> 0.17.7"},
       {:floki, ">= 0.30.0", only: :test},
-      {:phoenix_html, "~> 2.11"},
+      {:phoenix_html, "~> 3.1"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_dashboard, "~> 0.4"},
       {:telemetry_metrics, "~> 0.4"},
@@ -49,8 +49,10 @@ defmodule Discovery.MixProject do
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.24", only: :dev, runtime: false},
       {:uuid, "~> 1.1"},
-      {:k8s, "~> 1.0"},
-      {:cors_plug, "~> 2.0"}
+      {:k8s, "~> 1.1.5"},
+      {:cors_plug, "~> 2.0"},
+      # {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
+      {:tailwind, "~> 0.1", runtime: Mix.env() == :dev}
     ]
   end
 
@@ -63,7 +65,14 @@ defmodule Discovery.MixProject do
   defp aliases do
     [
       setup: ["deps.get", "cmd npm install --prefix assets"],
-      bump_release: &bump_release/1
+      bump_release: &bump_release/1,
+      test: ["test"],
+      purity: ["format", "credo --strict"],
+      "assets.deploy": [
+        "cmd --cd assets npm run deploy",
+        # "esbuild default --minify",
+        "phx.digest"
+      ]
     ]
   end
 
