@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Mon Jun 27 10:34:29 2022
+# Make data base, printed on Mon Jun 27 12:53:00 2022
 
 # Variables
 
@@ -77,9 +77,9 @@ DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/1000/bus
 # environment
 VSCODE_VERBOSE_LOGGING = true
 # environment
-TERMINATOR_UUID = urn:uuid:2c693a6d-4354-44e0-bad5-d7836603ce82
+TERMINATOR_UUID = urn:uuid:9c91f1cd-44b7-4073-9ed8-358cd5013d0a
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-96040d1e-6c37-4df7-a229-d6137eb6860f.sock
+VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-85d0a9a9-4fdb-4886-aacb-8d0837ac2f4d.sock
 # environment
 AWS_DEFAULT_REGION = ap-south-1
 # environment
@@ -221,8 +221,6 @@ GDK_BACKEND = x11
 # environment
 LC_PAPER = en_IN.UTF-8
 # environment
-NO_AT_BRIDGE = 1
-# environment
 QT_ACCESSIBILITY = 1
 # environment
 DESKTOP_AUTOSTART_ID = 10e29634a3213fc571165630431461875400000042980016
@@ -271,9 +269,9 @@ TERM = xterm-256color
 # environment
 TERMINATOR_DBUS_NAME = net.tenshu.Terminator23558193cd9818af7fe4d2c2f5bd9d00f
 # environment
-VSCODE_PID = 60192
+VSCODE_PID = 421760
 # variable set hash-table stats:
-# Load=130/1024=13%, Rehash=0, Collisions=18/155=12%
+# Load=129/1024=13%, Rehash=0, Collisions=18/154=12%
 
 # Pattern-specific Variable Values
 
@@ -288,10 +286,10 @@ VSCODE_PID = 60192
 # Implicit Rules
 
 # No implicit rules.
- 
 
 # Files
 
+ 
 # Not a target:
 all:
 #  Command line target.
@@ -421,6 +419,6 @@ commit-release-minor:
 # strcache performance: lookups = 60 / hit rate = 26%
 # hash-table stats:
 # Load=44/8192=1%, Rehash=0, Collisions=1/60=2%
-# Finished Make data base on Mon Jun 27 10:34:29 2022
+# Finished Make data base on Mon Jun 27 12:53:00 2022
 
  
