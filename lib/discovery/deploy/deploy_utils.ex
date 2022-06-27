@@ -137,7 +137,7 @@ defmodule Discovery.Deploy.DeployUtils do
   end
 
   @spec create_app_version_folder(status :: {:ok, term()} | {:error, term()}, app()) ::
-          :ok | {:error, term()}
+          {:ok, String.t()} | {:error, term()}
   defp create_app_version_folder(:ok, app) do
     Utils.puts_warn("Creating APP DEPLOYMENT DIRECTORY: #{app.app_name}-#{app.uid}")
 

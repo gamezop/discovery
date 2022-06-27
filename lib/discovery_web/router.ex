@@ -26,6 +26,13 @@ defmodule DiscoveryWeb.Router do
   scope "/api", DiscoveryWeb do
     pipe_through :api
     get "/get-endpoint", EndpointController, :get_endpoint
+
+    get "/apps", BaseController, :list_app
+    get "/:app/deployments", BaseController, :list_app_deployments
+    post "/create-app", BaseController, :create_app
+    post "/deploy-build", BaseController, :deploy_build
+    post "/delete-app", BaseController, :delete_app
+    post "/delete-deployment", BaseController, :delete_deployment
   end
 
   # Enables LiveDashboard only for development
