@@ -114,7 +114,7 @@
         </div>
         <div class="flex flex-col border border-gray-200 px-4 pt-1 pb-2 my-4">
           <div class="flex font-mono text-base font-light text-left items-center">Endpoint</div>
-          <div class="flex font-mono text-sm font-light text-left items-center">http://localhost:4000/api/get-endpoint?app_name=<%= @selected_app %></div>
+          <div class="flex font-mono text-sm font-light text-left items-center">https://dev-discoveryk8.skillclash.com/api/get-endpoint?app_name=<%= @selected_app %></div>
         </div>
       </div>
 
@@ -172,7 +172,7 @@
         >
           <td class="border-2 border-emerald-600 px-4 py-2 font-mono text-emerald-400 text-left"><%= app.app_name %></td>
           <td class="border-2 border-emerald-600 px-4 py-2 font-mono text-emerald-400 text-center"><%= app.deployments %></td>
-          <td class="border-2 border-emerald-600 px-4 py-2 font-mono text-emerald-400 text-center">http://localhost:4000/api/get-endpoint?app_name=<%= app.app_name %></td>
+          <td class="border-2 border-emerald-600 px-4 py-2 font-mono text-emerald-400 text-center">https://dev-discoveryk8.skillclash.com/api/get-endpoint?app_name=<%= app.app_name %></td>
           <td class="<%= if app.deployments === 0 do %>
               text-gray-300
               <% else %>

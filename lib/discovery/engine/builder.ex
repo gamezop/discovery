@@ -184,10 +184,7 @@ defmodule Discovery.Engine.Builder do
     case app_deployment_name |> String.split("-") do
       [app_id, path] ->
         ingress_response =
-          K8s.Client.get("extensions/v1beta1", "ingress",
-            namespace: "discovery",
-            name: app_id
-          )
+          K8s.Client.get("extensions/v1beta1", "ingress", namespace: "discovery", name: app_id)
           |> then(&K8s.Client.run(connection, &1))
 
         case ingress_response do

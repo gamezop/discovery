@@ -5,7 +5,9 @@
 # is restricted to this project.
 
 # General application configuration
-use Mix.Config
+import Config
+
+config :iex, default_prompt: "📡"
 
 # Configures the endpoint
 config :discovery, DiscoveryWeb.Endpoint,

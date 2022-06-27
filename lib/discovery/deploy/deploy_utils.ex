@@ -80,7 +80,7 @@ defmodule Discovery.Deploy.DeployUtils do
   defp create_ingress(error, _app), do: error
 
   @spec write_to_ingress(atom(), binary(), app()) :: :ok | {:error, term()}
-  defp write_to_ingress(app_type, ingress_template, app) do
+  defp write_to_ingress(_app_type, ingress_template, app) do
     ingress_out =
       String.replace(ingress_template, "APP_NAME", app.app_name)
       |> String.replace("UID", app.uid)
@@ -92,11 +92,12 @@ defmodule Discovery.Deploy.DeployUtils do
         update_ingress_paths(app)
         Utils.puts_warn("RUNNING INGRESS: #{app.app_name}")
 
-        if app_type == :old_app do
-          patch_resource(File.cwd!() <> "/minikube/discovery/#{app.app_name}/ingress.yml")
-        else
-          run_resource(File.cwd!() <> "/minikube/discovery/#{app.app_name}/ingress.yml")
-        end
+        # if app_type == :old_app do
+        patch_resource(File.cwd!() <> "/minikube/discovery/#{app.app_name}/ingress.yml")
+
+      # else
+      #   run_resource(File.cwd!() <> "/minikube/discovery/#{app.app_name}/ingress.yml")
+      # end
 
       error ->
         error
@@ -268,12 +269,10 @@ defmodule Discovery.Deploy.DeployUtils do
     conn = Builder.get_conn()
     deployment = K8s.Resource.from_file!(resource)
     # |> IO.inspect(label: "deployment")
-    operation = K8s.Client.apply(deployment)
-    # |> IO.inspect(label: "apply")
-    # operation = K8s.Client.create(deployment)
-    # |> IO.inspect(label: "apply")
+    operation = K8s.Client.patch(deployment)
+    # |> IO.inspect(label: "patch")
     K8s.Client.run(conn, operation)
-    # |> IO.inspect(label: "run apply operation")
+    # |> IO.inspect(label: "run patch operation")
     Utils.puts_success(resource)
     # |> IO.inspect(label: "success")
   end
