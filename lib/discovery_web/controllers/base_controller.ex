@@ -22,22 +22,22 @@ defmodule DiscoveryWeb.BaseController do
     json(conn, %{deployment_data: deployment_data})
   end
 
-  def create_app(conn, params) do
+  def create_app(conn, _params) do
     # params |> IO.inspect(label: "create_app params")
     json(conn, :ok)
   end
 
-  def deploy_build(conn, params) do
+  def deploy_build(conn, _params) do
     # params |> IO.inspect(label: "deploy_build params")
     json(conn, :ok)
   end
 
-  def delete_app(conn, params) do
+  def delete_app(conn, _params) do
     # params |> IO.inspect(label: "delete_app params")
     json(conn, :ok)
   end
 
-  def delete_deployment(conn, params) do
+  def delete_deployment(conn, _params) do
     # params |> IO.inspect(label: "delete_deployment params")
     json(conn, :ok)
   end

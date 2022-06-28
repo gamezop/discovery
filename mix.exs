@@ -52,7 +52,8 @@ defmodule Discovery.MixProject do
       {:k8s, "~> 1.1.5"},
       {:cors_plug, "~> 2.0"},
       # {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
-      {:tailwind, "~> 0.1", runtime: Mix.env() == :dev}
+      {:tailwind, "~> 0.1", runtime: Mix.env() == :dev},
+      {:yaml_elixir, "~> 2.9.0"}
     ]
   end
 

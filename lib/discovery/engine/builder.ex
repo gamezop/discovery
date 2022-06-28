@@ -69,8 +69,9 @@ defmodule Discovery.Engine.Builder do
   # Connects to Kubernetes
   @spec connect_to_k8() :: any()
   defp connect_to_k8 do
-    case K8s.Conn.from_service_account() do
-      # case K8s.Conn.from_file("~/.kube/config", context: "minikube") do
+    Application.get_env(:discovery, :connection_method)
+    |> generate_configuration()
+    |> case do
       {:ok, conn_ref} ->
         Logger.info("K8 connection success")
         conn_ref
@@ -79,6 +80,21 @@ defmodule Discovery.Engine.Builder do
         Logger.info("Error while K8 conneciton due to #{inspect(reason)}")
         # V2: Add connection retry for prod case
         nil
+    end
+  end
+
+  @spec generate_configuration(String.t()) ::
+          {:ok, any()} | {:error, :enoent | K8s.Conn.Error.t() | String.t()}
+  defp generate_configuration(method) do
+    case method do
+      :service_account ->
+        K8s.Conn.from_service_account()
+
+      :kube_config ->
+        K8s.Conn.from_file("~/.kube/config", context: "minikube")
+
+      _ ->
+        {:error, "connection method unavailable"}
     end
   end
 
@@ -96,7 +112,6 @@ defmodule Discovery.Engine.Builder do
 
   @spec fetch_deployment_list(__MODULE__.t()) :: list(map())
   defp fetch_deployment_list(state) do
-    # V2: namespace should discovery, i guess, as not only games are deployed.
     response =
       K8s.Client.list("apps/v1", "Deployment", namespace: "discovery")
       |> then(&K8s.Client.run(state.conn_ref, &1))
@@ -200,25 +215,5 @@ defmodule Discovery.Engine.Builder do
       _ ->
         ""
     end
-
-    # # app deployment names are always in a format [app_id]-[serial-id]
-    # [app_id, path] = app_deployment_name |> String.split("-")
-
-    # ingress_response =
-    #   K8s.Client.get("extensions/v1beta1", "ingress",
-    #     namespace: "discovery",
-    #     name: app_id
-    #   )
-    #   |> then(&K8s.Client.run(connection, &1))
-
-    # case ingress_response do
-    #   {:ok, ingress_data} ->
-    #     [rule | _rules] = ingress_data["spec"]["rules"]
-    #     "#{rule["host"]}/#{path}"
-
-    #   {:error, reason} ->
-    #     IO.puts("Error on fetching ingress, due to #{inspect(reason)}")
-    #     ""
-    # end
   end
 end

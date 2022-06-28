@@ -114,4 +114,5 @@ https://stackoverflow.com/questions/42642170/how-to-run-kubectl-commands-inside-
   - create for new ingress
   - access of sa for above verbs
 
+  - deleting deployment should delete corresponding ingress path
 

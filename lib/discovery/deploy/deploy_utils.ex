@@ -11,6 +11,8 @@ defmodule Discovery.Deploy.DeployUtils do
   @type t :: %DeployUtils{
           app_name: String.t(),
           app_image: String.t()
+          # TO-DO: add config_map for each deployment
+          # config_map: map()
         }
 
   @type app :: %{
