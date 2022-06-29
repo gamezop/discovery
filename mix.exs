@@ -54,8 +54,8 @@ defmodule Discovery.MixProject do
       # {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.1", runtime: Mix.env() == :dev},
       {:yaml_elixir, "~> 2.9.0"},
-      # {:yamlix, git: "https://github.com/azatychyn/yamlix.git"}
-      {:yamlix, path: "../ext-modules/yamlix"}
+      {:yamlix, git: "https://github.com/ghostdsb/yamlix.git"}
+      # {:yamlix, path: "../ext-modules/yamlix"}
     ]
   end
 
