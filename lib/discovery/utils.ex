@@ -39,4 +39,13 @@ defmodule Discovery.Utils do
   def puts_error(term) do
     IO.puts(IO.ANSI.format([:red_background, :black, inspect(term)]))
   end
+
+  # @spec to_yml(any) :: String.t()
+  @spec to_yml(map, String.t()) :: :ok
+  def to_yml(map, location) do
+    yml = Yamlix.dump(map, false)
+
+    {:ok, io} = File.open(location, [:write, :utf8])
+    IO.write(io, yml)
+  end
 end

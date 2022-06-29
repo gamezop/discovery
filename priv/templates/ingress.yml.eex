@@ -12,3 +12,4 @@ spec:
   - host: dev-enterprisek8.skillclash.com
     http:
       paths:
+        -

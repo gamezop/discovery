@@ -1,14 +1,23 @@
+
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: APP_NAME
-  namespace: discovery 
   annotations:
     kubernetes.io/ingress.class: nginx-external
-    nginx.ingress.kubernetes.io/upstream-hash-by: "$uid"
     nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/upstream-hash-by: "$uid"
+  name: enterprise
+  namespace: discovery
 spec:
   rules:
   - host: dev-enterprisek8.skillclash.com
     http:
       paths:
+      - backend:
+          serviceName: WW3-1234
+          servicePort: 80
+        path: /1234(/|$)(.*)
+      - backend:
+          serviceName: WW3-1234675
+          servicePort: 80
+        path: /1234675(/|$)(.*)

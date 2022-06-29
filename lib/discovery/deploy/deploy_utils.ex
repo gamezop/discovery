@@ -53,6 +53,7 @@ defmodule Discovery.Deploy.DeployUtils do
     end
   end
 
+  @spec create_namespace_directory :: :ok
   def create_namespace_directory do
     if File.exists?("minikube/discovery/namespace.yml") do
       Utils.puts_warn("NAMESPACE DIRECTORY EXISTS")
