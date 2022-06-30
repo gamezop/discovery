@@ -50,7 +50,8 @@ defmodule Discovery.Resources.ConfigMap do
     Utils.to_yml(map, location)
   end
 
-  @spec resource_file(DeployUtils.app()) :: {:ok, String.t()} | {:error, String.t()}
+  @spec resource_file(DeployUtils.app() | DeployUtils.del_deployment()) ::
+          {:ok, String.t()} | {:error, String.t()}
   def resource_file(app) do
     case File.cwd() do
       {:ok, cwd} ->
@@ -60,6 +61,11 @@ defmodule Discovery.Resources.ConfigMap do
       _ ->
         {:error, "no read permission"}
     end
+  end
+
+  @spec delete_operation(String.t()) :: K8s.Operation.t()
+  def delete_operation(name) do
+    K8s.Client.delete(api_version(), "ConfigMap", namespace: "discovery", name: name)
   end
 
   defp api_version do

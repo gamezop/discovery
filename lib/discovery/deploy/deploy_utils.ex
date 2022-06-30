@@ -36,6 +36,11 @@ defmodule Discovery.Deploy.DeployUtils do
           app_container_port: number()
         }
 
+  @type del_deployment :: %{
+          app_name: String.t(),
+          uid: String.t()
+        }
+
   defstruct(
     app_name: "",
     app_image: "",
@@ -65,11 +70,11 @@ defmodule Discovery.Deploy.DeployUtils do
     }
 
     with :ok <- create_app_folder(app_details.app_name),
-         {:ok, _ingress} <- create_ingress(app_details),
+         {:ok, _ing_map} <- create_ingress(app_details),
          :ok <- create_app_version_folder(app_details),
-         {:ok, _configmap} <- create_configmap(app_details),
-         {:ok, _deployment} <- create_deployment(app_details),
-         {:ok, _service} <- create_service(app_details) do
+         {:ok, _cfg_map} <- create_configmap(app_details),
+         {:ok, _dpl_map} <- create_deployment(app_details),
+         {:ok, _svc_map} <- create_service(app_details) do
       Utils.puts_success("SUCCESFULLY DEPLOYED: #{app_details.app_image}")
 
       {:ok,
@@ -77,6 +82,20 @@ defmodule Discovery.Deploy.DeployUtils do
          deployment: "#{app_details.app_name}-#{app_details.uid}",
          image: "#{app_details.app_image}"
        }}
+    end
+  end
+
+  @spec delete_app_deployment(del_deployment()) :: {:ok, term()} | {:error, term()}
+  def delete_app_deployment(app_details) do
+    name = "#{app_details.app_name}-#{app_details.uid}"
+
+    with {:ok, _} <- delete_service(name),
+         {:ok, _} <- delete_deployment(name),
+         {:ok, _} <- delete_configmap(name),
+         {:ok, _} <- delete_app_version_folder(app_details),
+         {:ok, _} <- delete_path_from_ingress(app_details) do
+      Utils.puts_success("SUCCESFULLY DELETED: #{app_details}")
+      {:ok, %{deleted: "#{name}"}}
     end
   end
 
@@ -106,10 +125,33 @@ defmodule Discovery.Deploy.DeployUtils do
     File.mkdir("minikube/discovery/#{app.app_name}/#{app.app_name}-#{app.uid}")
   end
 
+  @spec delete_app_version_folder(del_deployment()) :: {:ok, list()} | {:error, String.t()}
+  defp delete_app_version_folder(app) do
+    File.rm_rf("minikube/discovery/#{app.app_name}/#{app.app_name}-#{app.uid}")
+    |> case do
+      {:ok, list} ->
+        {:ok, list}
+
+      {:error, reason, _} ->
+        {:error, "error in deleting folder #{app.app_name}-#{app.uid}: #{reason}"}
+    end
+  end
+
   @spec create_ingress(app()) :: {:ok, map()} | {:error, term()}
   defp create_ingress(app) do
     with {:ok, {ingress_status, ingress}} <- Ingress.fetch_configuration(app),
          updated_ingress <- Ingress.add_ingress_path(ingress, app),
+         {:ok, resource_location} <- Ingress.resource_file(app),
+         :ok <- Ingress.write_to_file(updated_ingress, resource_location),
+         :ok <- apply_ingress(ingress_status, resource_location) do
+      {:ok, updated_ingress}
+    end
+  end
+
+  @spec delete_path_from_ingress(del_deployment()) :: {:ok, map()} | {:error, term()}
+  defp delete_path_from_ingress(app) do
+    with {:ok, {ingress_status, ingress}} <- Ingress.fetch_configuration(app),
+         updated_ingress <- Ingress.remove_ingress_path(ingress, app),
          {:ok, resource_location} <- Ingress.resource_file(app),
          :ok <- Ingress.write_to_file(updated_ingress, resource_location),
          :ok <- apply_ingress(ingress_status, resource_location) do
@@ -135,6 +177,14 @@ defmodule Discovery.Deploy.DeployUtils do
     end
   end
 
+  @spec delete_configmap(String.t()) :: {:ok, String.t()} | {:error, term()}
+  defp delete_configmap(name) do
+    with operation <- ConfigMap.delete_operation(name),
+         :ok <- delete_resource(operation, name) do
+      {:ok, "configmap #{name} deleted"}
+    end
+  end
+
   @spec create_deployment(app()) :: {:ok, map()} | {:error, term()}
   defp create_deployment(app) do
     with {:ok, deployment} <- Deployment.create_deployment(app),
@@ -145,6 +195,14 @@ defmodule Discovery.Deploy.DeployUtils do
     end
   end
 
+  @spec delete_deployment(String.t()) :: {:ok, String.t()} | {:error, term()}
+  defp delete_deployment(name) do
+    with operation <- Deployment.delete_operation(name),
+         :ok <- delete_resource(operation, name) do
+      {:ok, "deployment #{name} deleted"}
+    end
+  end
+
   @spec create_service(app()) :: {:ok, map()} | {:error, term()}
   defp create_service(app) do
     with {:ok, service} <- Service.create_service(app),
@@ -152,6 +210,14 @@ defmodule Discovery.Deploy.DeployUtils do
          :ok <- Service.write_to_file(service, resource_location),
          :ok <- run_resource(resource_location) do
       {:ok, service}
+    end
+  end
+
+  @spec delete_service(String.t()) :: {:ok, String.t()} | {:error, term()}
+  defp delete_service(name) do
+    with operation <- Service.delete_operation(name),
+         :ok <- delete_resource(operation, name) do
+      {:ok, "service #{name} deleted"}
     end
   end
 
@@ -198,6 +264,27 @@ defmodule Discovery.Deploy.DeployUtils do
         Logger.error(error)
         Utils.puts_error("ERROR IN PATCHING RESOURCE: #{resource}")
         {:error, "error in patching #{resource}"}
+    end
+  end
+
+  @spec delete_resource(K8s.Operation.t(), String.t()) :: :ok | {:error, String.t()}
+  defp delete_resource(del_operation, name) do
+    Utils.puts_warn("DELETING RESOURCE: #{name}")
+
+    with conn when not is_nil(conn) <- Builder.get_conn(),
+         {:ok, _} <- K8s.Client.run(conn, del_operation) do
+      Utils.puts_success("DELETED: #{name}")
+      :ok
+    else
+      nil ->
+        Logger.error("no K8s connection found")
+        Utils.puts_error("ERROR IN DELETING RESOURCE: #{name}")
+        {:error, "error in deleting #{name}"}
+
+      {:error, error} ->
+        Logger.error(error)
+        Utils.puts_error("ERROR IN DELETING RESOURCE: #{name}")
+        {:error, "error in deleting #{name}"}
     end
   end
 end

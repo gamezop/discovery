@@ -14,7 +14,7 @@ defmodule Discovery.Deploy.DeployManager do
   @doc """
   Creates/updates a deployment
   """
-  @spec create(DeplouUtis.t()) :: any()
+  @spec create(DeployUtils.t()) :: any()
   def create(deploy_details) do
     GenServer.call(__MODULE__, {:create, deploy_details}, :infinity)
   end

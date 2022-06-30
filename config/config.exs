@@ -28,9 +28,9 @@ config :discovery,
   # available methods
   #   - :kube_config
   #   - :service_account
-  connection_method: :service_account,
+  connection_method: :kube_config,
   namespace: "discovery",
-  service_account: "discovery-sa",
+  service_account: "discovery-service-account",
   resources: %{
     limits: %{cpu: "500m", memory: "500Mi"},
     requests: %{cpu: "100m", memory: "300Mi"}
