@@ -18,7 +18,7 @@ defmodule DiscoveryWeb.BaseController do
          deployment_data <- BridgeUtils.get_deployment_data(params.app_name) do
       json(conn, %{deployment_data: deployment_data})
     else
-      {:error, _} -> json(conn, "error")
+      {:error, _} -> json(put_status(conn, 400), "error")
     end
   end
 
@@ -31,7 +31,7 @@ defmodule DiscoveryWeb.BaseController do
          {:ok, :app_inserted} <- BridgeUtils.create_app(params.app_name) do
       json(conn, params)
     else
-      {:error, reason} -> json(conn, reason)
+      {:error, reason} -> json(put_status(conn, 400), reason)
     end
   end
 
@@ -49,7 +49,7 @@ defmodule DiscoveryWeb.BaseController do
          {:ok, response} <- BridgeUtils.create_deployment(params) do
       json(conn, response)
     else
-      {:error, reason} -> json(conn, reason)
+      {:error, reason} -> json(put_status(conn, 400), reason)
     end
   end
 
@@ -61,7 +61,7 @@ defmodule DiscoveryWeb.BaseController do
     with {:ok, params} <- Tarams.cast(params, @delete_app_params) do
       json(conn, params)
     else
-      {:error, _} -> json(conn, "error")
+      {:error, _} -> json(put_status(conn, 400), "error")
     end
   end
 
@@ -73,7 +73,7 @@ defmodule DiscoveryWeb.BaseController do
     with {:ok, params} <- Tarams.cast(params, @delete_deployment_params) do
       json(conn, params)
     else
-      {:error, _} -> json(conn, "error")
+      {:error, _} -> json(put_status(conn, 400), "error")
     end
   end
 end

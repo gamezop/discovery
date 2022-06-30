@@ -64,15 +64,19 @@ defmodule Discovery.Deploy.DeployUtils do
       app_container_port: deployment_details.app_container_port
     }
 
-    case File.dir?(@root_dir <> app_details.app_name) do
-      true ->
-        create_ingress(:ok, app_details)
-        |> create_app_version_folder(app_details)
+    with :ok <- create_app_folder(app_details.app_name),
+         {:ok, _ingress} <- create_ingress(app_details),
+         :ok <- create_app_version_folder(app_details),
+         {:ok, _configmap} <- create_configmap(app_details),
+         {:ok, _deployment} <- create_deployment(app_details),
+         {:ok, _service} <- create_service(app_details) do
+      Utils.puts_success("SUCCESFULLY DEPLOYED: #{app_details.app_image}")
 
-      _ ->
-        create_app_folder(app_details.app_name)
-        |> create_ingress(app_details)
-        |> create_app_version_folder(app_details)
+      {:ok,
+       %{
+         deployment: "#{app_details.app_name}-#{app_details.uid}",
+         image: "#{app_details.app_image}"
+       }}
     end
   end
 
@@ -90,11 +94,20 @@ defmodule Discovery.Deploy.DeployUtils do
 
   @spec create_app_folder(String.t()) :: :ok | {:error, term()}
   defp create_app_folder(app_name) do
-    File.mkdir("minikube/discovery/#{app_name}")
+    if File.dir?(@root_dir <> app_name) do
+      :ok
+    else
+      File.mkdir("minikube/discovery/#{app_name}")
+    end
   end
 
-  @spec create_ingress(status :: :ok | {:error, term()}, app()) :: {:ok, map()} | {:error, term()}
-  defp create_ingress(:ok, app) do
+  @spec create_app_folder(app()) :: :ok | {:error, term()}
+  defp create_app_version_folder(app) do
+    File.mkdir("minikube/discovery/#{app.app_name}/#{app.app_name}-#{app.uid}")
+  end
+
+  @spec create_ingress(app()) :: {:ok, map()} | {:error, term()}
+  defp create_ingress(app) do
     with {:ok, {ingress_status, ingress}} <- Ingress.fetch_configuration(app),
          updated_ingress <- Ingress.add_ingress_path(ingress, app),
          {:ok, resource_location} <- Ingress.resource_file(app),
@@ -104,8 +117,6 @@ defmodule Discovery.Deploy.DeployUtils do
     end
   end
 
-  defp create_ingress(error, _app), do: error
-
   defp apply_ingress(:new_ingress, resource_location) do
     run_resource(resource_location)
   end
@@ -114,62 +125,52 @@ defmodule Discovery.Deploy.DeployUtils do
     patch_resource(resource_location)
   end
 
-  @spec create_app_version_folder({:ok, map()} | {:error, any()}, app()) ::
-          {:ok, String.t()} | {:error, term()}
-  defp create_app_version_folder({:ok, _ingress_map}, app) do
-    Utils.puts_warn("Creating APP DEPLOYMENT DIRECTORY: #{app.app_name}-#{app.uid}")
-
-    with :ok <- File.mkdir("minikube/discovery/#{app.app_name}/#{app.app_name}-#{app.uid}"),
-         :ok <- create_configmap(app),
-         :ok <- create_deployment(app),
-         :ok <- create_service(app) do
-      {:ok, "#{app.app_name}-#{app.uid}"}
-    end
-  end
-
-  defp create_app_version_folder(error, _app), do: error
-
-  @spec create_configmap(app()) :: :ok | {:error, term()}
+  @spec create_configmap(app()) :: {:ok, map()} | {:error, term()}
   defp create_configmap(app) do
     with {:ok, config_map} <- ConfigMap.set_config_map(app),
          {:ok, resource_location} <- ConfigMap.resource_file(app),
          :ok <- ConfigMap.write_to_file(config_map, resource_location),
          :ok <- run_resource(resource_location) do
-      :ok
+      {:ok, config_map}
     end
   end
 
-  @spec create_deployment(app()) :: :ok | {:error, term()}
+  @spec create_deployment(app()) :: {:ok, map()} | {:error, term()}
   defp create_deployment(app) do
     with {:ok, deployment} <- Deployment.create_deployment(app),
          {:ok, resource_location} <- Deployment.resource_file(app),
          :ok <- Deployment.write_to_file(deployment, resource_location),
          :ok <- run_resource(resource_location) do
-      :ok
+      {:ok, deployment}
     end
   end
 
-  @spec create_service(app()) :: :ok | {:error, term()}
+  @spec create_service(app()) :: {:ok, map()} | {:error, term()}
   defp create_service(app) do
     with {:ok, service} <- Service.create_service(app),
          {:ok, resource_location} <- Service.resource_file(app),
          :ok <- Service.write_to_file(service, resource_location),
          :ok <- run_resource(resource_location) do
-      :ok
+      {:ok, service}
     end
   end
 
   @spec run_resource(String.t()) :: :ok | {:error, String.t()}
   defp run_resource(resource) do
-    conn = Builder.get_conn()
     Utils.puts_warn("RUNNING RESOURCE: #{resource}")
 
-    with {:ok, resource_map} <- K8s.Resource.from_file(resource),
+    with conn when not is_nil(conn) <- Builder.get_conn(),
+         {:ok, resource_map} <- K8s.Resource.from_file(resource),
          operation <- K8s.Client.create(resource_map),
          {:ok, _} <- K8s.Client.run(conn, operation) do
       Utils.puts_success("SUCCESS: #{resource}")
       :ok
     else
+      nil ->
+        Logger.error("no K8s connection found")
+        Utils.puts_error("ERROR IN APPLYING RESOURCE: #{resource}")
+        {:error, "error in applying #{resource}"}
+
       {:error, error} ->
         Logger.error(error)
         Utils.puts_error("ERROR IN APPLYING RESOURCE: #{resource}")
@@ -179,15 +180,20 @@ defmodule Discovery.Deploy.DeployUtils do
 
   @spec patch_resource(String.t()) :: :ok | {:error, String.t()}
   defp patch_resource(resource) do
-    conn = Builder.get_conn()
     Utils.puts_warn("RUNNING RESOURCE: #{resource}")
 
-    with {:ok, resource_map} <- K8s.Resource.from_file(resource),
+    with conn when not is_nil(conn) <- Builder.get_conn(),
+         {:ok, resource_map} <- K8s.Resource.from_file(resource),
          operation <- K8s.Client.patch(resource_map),
          {:ok, _} <- K8s.Client.run(conn, operation) do
       Utils.puts_success("SUCCESS: #{resource}")
       :ok
     else
+      nil ->
+        Logger.error("no K8s connection found")
+        Utils.puts_error("ERROR IN APPLYING RESOURCE: #{resource}")
+        {:error, "error in applying #{resource}"}
+
       {:error, error} ->
         Logger.error(error)
         Utils.puts_error("ERROR IN PATCHING RESOURCE: #{resource}")
