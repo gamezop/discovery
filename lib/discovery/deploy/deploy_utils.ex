@@ -94,9 +94,23 @@ defmodule Discovery.Deploy.DeployUtils do
          {:ok, _} <- delete_configmap(name),
          {:ok, _} <- delete_app_version_folder(app_details),
          {:ok, _} <- delete_path_from_ingress(app_details) do
-      Utils.puts_success("SUCCESFULLY DELETED: #{app_details}")
+      Utils.puts_success("SUCCESFULLY DELETED: #{name}")
       {:ok, %{deleted: "#{name}"}}
     end
+  end
+
+  # TO-DO REFACTOR ME
+  @spec delete_app(binary) :: {:ok, [binary]} | {:error, atom, binary}
+  def delete_app(app_name) do
+    Ingress.get_ingress_services(app_name)
+    |> Enum.each(fn app ->
+      delete_service(app)
+      delete_deployment(app)
+      delete_configmap(app)
+    end)
+    Ingress.delete_operation(app_name)
+    |> delete_resource(app_name)
+    File.rm_rf("minikube/discovery/#{app_name}")
   end
 
   @spec create_namespace_directory :: :ok
