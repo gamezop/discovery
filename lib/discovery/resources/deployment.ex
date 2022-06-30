@@ -3,16 +3,18 @@ defmodule Discovery.Resources.Deployment do
   Deployment related K8s operations
   """
 
+  alias Discovery.Deploy.DeployUtils
   alias Discovery.Utils
 
-  @spec create_deployment(map) :: {:error, any()} | {:ok, map()}
+  @spec create_deployment(DeployUtils.app()) :: {:error, any()} | {:ok, map()}
   def create_deployment(app) do
     with {:ok, map} <-
-           "#{:code.priv_dir(:discovery)}/templates/deploy.yml.eex"
+           "#{:code.priv_dir(:discovery)}/templates/deploy.yml"
            |> YamlElixir.read_from_file(atoms: false),
          map <- put_in(map["apiVersion"], api_version()),
          map <- put_in(map["metadata"]["name"], "#{app.app_name}-#{app.uid}"),
          map <- put_in(map["metadata"]["annotations"]["app_id"], "#{app.app_name}"),
+         map <- put_in(map["spec"]["template"]["spec"]["serviceAccountName"], service_account()),
          map <-
            put_in(map["spec"]["selector"]["matchLabels"]["app"], "#{app.app_name}-#{app.uid}"),
          map <-
@@ -51,9 +53,20 @@ defmodule Discovery.Resources.Deployment do
     end
   end
 
-  @spec write_to_file(map) :: :ok
-  def write_to_file(map) do
-    Utils.to_yml(map, "priv/templates/configmap.yml")
+  @spec write_to_file(map, String.t()) :: :ok
+  def write_to_file(map, location) do
+    Utils.to_yml(map, location)
+  end
+
+  @spec resource_file(DeployUtils.app()) :: {:ok, String.t()} | {:error, String.t()}
+  def resource_file(app) do
+    case File.cwd() do
+      {:ok, cwd} ->
+        {:ok, cwd <> "/minikube/discovery/#{app.app_name}/#{app.app_name}-#{app.uid}/deploy.yml"}
+
+      _ ->
+        {:error, "no read permission"}
+    end
   end
 
   defp resources do
@@ -84,5 +97,9 @@ defmodule Discovery.Resources.Deployment do
   defp api_version do
     Application.get_env(:discovery, :api_version)
     |> Keyword.get(:deployment)
+  end
+
+  defp service_account do
+    Application.get_env(:discovery, :service_account)
   end
 end

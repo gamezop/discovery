@@ -1,4 +1,4 @@
-
+## DONOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING ##
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
@@ -13,11 +13,4 @@ spec:
   - host: dev-enterprisek8.skillclash.com
     http:
       paths:
-      - backend:
-          serviceName: WW3-1234
-          servicePort: 80
-        path: /1234(/|$)(.*)
-      - backend:
-          serviceName: WW3-1234675
-          servicePort: 80
-        path: /1234675(/|$)(.*)
+      - 

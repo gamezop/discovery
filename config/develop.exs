@@ -17,6 +17,8 @@ config :discovery, DiscoveryWeb.Endpoint,
 # Do not print debug messages in production
 config :logger, level: :info
 
+config :discovery, :base_url, "https://dev-discoveryk8.skillclash.com"
+
 # ## SSL Support
 #
 # To get SSL working, you will need to add the `https` key

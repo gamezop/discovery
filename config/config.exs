@@ -28,14 +28,9 @@ config :discovery,
   # available methods
   #   - :kube_config
   #   - :service_account
-  connection_method: :kube_config,
-  # The namespace to watch for Namespaced CRDs.
-  # Defaults to "default". `:all` for all namespaces
+  connection_method: :service_account,
   namespace: "discovery",
-  # Name must only consist of only lowercase letters and hyphens.
-  # Defaults to hyphenated mix app name
   service_account: "discovery-sa",
-  # Operator deployment resources. These are the defaults.
   resources: %{
     limits: %{cpu: "500m", memory: "500Mi"},
     requests: %{cpu: "100m", memory: "300Mi"}

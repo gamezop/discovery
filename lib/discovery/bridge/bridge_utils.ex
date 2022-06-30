@@ -37,7 +37,8 @@ defmodule Discovery.Bridge.BridgeUtils do
 
       %{
         app_name: app_name,
-        deployments: deployment_count
+        deployments: deployment_count,
+        url: "#{Application.get_env(:discovery, :base_url)}/api/get-endpoint?app_name=#{app_name}"
       }
     end)
   end
