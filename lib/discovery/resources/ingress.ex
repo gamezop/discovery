@@ -87,6 +87,24 @@ defmodule Discovery.Resources.Ingress do
     K8s.Client.run(conn, operation)
   end
 
+  @spec get_ingress_services(String.t()) :: list
+  def get_ingress_services(app_name) do
+    app_name
+    |> current_k8s_ingress_configuration()
+    |> case do
+      {:ok, ing} ->
+          ing
+          |> get_in(["spec", "rules"])
+          |> hd
+          |> get_in(["http", "paths"])
+          |> Enum.map(fn path_details ->
+            path_details
+            |> get_in(["backend", "serviceName"]) end)
+      _ ->
+        []
+    end
+  end
+
   @spec delete_operation(String.t()) :: K8s.Operation.t()
   def delete_operation(name) do
     K8s.Client.delete(api_version(), "Ingress", namespace: "discovery", name: name)
