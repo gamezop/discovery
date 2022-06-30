@@ -7,7 +7,8 @@ defmodule Discovery.Resources.Ingress do
   alias Discovery.Engine.Builder
   alias Discovery.Utils
 
-  @spec fetch_configuration(DeployUtils.app()) :: {:error, any()} | {:ok, {atom(), map()}}
+  @spec fetch_configuration(DeployUtils.app() | DeployUtils.del_deployment()) ::
+          {:error, any()} | {:ok, {atom(), map()}}
   def fetch_configuration(app) do
     File.exists?("minikube/discovery/#{app.app_name}/ingress.yml")
     |> if do
@@ -38,15 +39,15 @@ defmodule Discovery.Resources.Ingress do
     map
   end
 
-  @spec remove_ingress_path(map, String.t()) :: map
-  def remove_ingress_path(current_ingress_map, ingress_path_name) do
+  @spec remove_ingress_path(map, DeployUtils.del_deployment()) :: map
+  def remove_ingress_path(current_ingress_map, app) do
     rules = current_ingress_map["spec"]["rules"] |> hd
     all_paths = rules["http"]["paths"]
 
     new_path_list =
       all_paths
       |> Enum.filter(fn path_details ->
-        path_details["backend"]["serviceName"] != ingress_path_name
+        path_details["backend"]["serviceName"] != "#{app.app_name}-#{app.uid}"
       end)
 
     map =
@@ -61,7 +62,8 @@ defmodule Discovery.Resources.Ingress do
     Utils.to_yml(map, location)
   end
 
-  @spec resource_file(DeployUtils.app()) :: {:ok, String.t()} | {:error, String.t()}
+  @spec resource_file(DeployUtils.app() | DeployUtils.del_deployment()) ::
+          {:ok, String.t()} | {:error, String.t()}
   def resource_file(app) do
     case File.cwd() do
       {:ok, cwd} -> {:ok, cwd <> "/minikube/discovery/#{app.app_name}/ingress.yml"}
@@ -83,6 +85,11 @@ defmodule Discovery.Resources.Ingress do
     conn = Builder.get_conn()
     operation = K8s.Client.get(api_version(), :ingress, namespace: namespace(), name: app_name)
     K8s.Client.run(conn, operation)
+  end
+
+  @spec delete_operation(String.t()) :: K8s.Operation.t()
+  def delete_operation(name) do
+    K8s.Client.delete(api_version(), "Ingress", namespace: "discovery", name: name)
   end
 
   @spec current_ingress_configuration(String.t()) :: {:ok, {atom(), map()}} | {:error, String.t()}
