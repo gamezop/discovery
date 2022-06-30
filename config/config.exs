@@ -7,8 +7,6 @@
 # General application configuration
 import Config
 
-config :iex, default_prompt: "📡"
-
 # Configures the endpoint
 config :discovery, DiscoveryWeb.Endpoint,
   url: [host: "localhost"],
@@ -25,12 +23,26 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
-# Connection method for K8s
-# available connection methods
-#   - :kube_config
-#   - :service_account
 config :discovery,
-  connection_method: :kube_config
+  # Connection method for K8s
+  # available methods
+  #   - :kube_config
+  #   - :service_account
+  connection_method: :service_account,
+  namespace: "discovery",
+  service_account: "discovery-sa",
+  resources: %{
+    limits: %{cpu: "500m", memory: "500Mi"},
+    requests: %{cpu: "100m", memory: "300Mi"}
+  },
+  image_pull_secrets: "dockerhub-auth-discovery"
+
+config :discovery, :api_version,
+  config_map: "v1",
+  deployment: "apps/v1",
+  ingress: "networking.k8s.io/v1beta1",
+  namespace: "v1",
+  service: "v1"
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

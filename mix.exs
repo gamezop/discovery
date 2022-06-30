@@ -53,7 +53,10 @@ defmodule Discovery.MixProject do
       {:cors_plug, "~> 2.0"},
       # {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.1", runtime: Mix.env() == :dev},
-      {:yaml_elixir, "~> 2.9.0"}
+      {:yaml_elixir, "~> 2.9.0"},
+      {:tarams, "~> 1.6.1"},
+      {:yamlix, git: "https://github.com/ghostdsb/yamlix.git", branch: "master"}
+      # {:yamlix, path: "../ext-modules/yamlix"}
     ]
   end
 

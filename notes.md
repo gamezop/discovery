@@ -88,15 +88,16 @@ https://stackoverflow.com/questions/42642170/how-to-run-kubectl-commands-inside-
 ## Service account
 
   discovery-sa added to namespace discovery with following access
-  - apiGroups: [""]
-    resources: ["pods", "services", "pods/log", "configmaps"]
-    verbs: ["get", "watch", "list", "patch", "create"]
-  - apiGroups: ["extensions", "apps"]
-    resources: ["deployments"]
-    verbs: ["get", "list", "watch", "patch", "create"]
-  - apiGroups: ["extensions", "networking.k8s.io"]
-    resources: ["ingresses"]
-    verbs: ["get", "list", "watch", "patch", "create", "update"]
+  
+    - apiGroups: [""]
+      resources: ["pods", "services", "pods/log", "configmaps"]
+      verbs: ["get", "watch", "list", "patch", "create"]
+    - apiGroups: ["extensions", "apps"]
+      resources: ["deployments"]
+      verbs: ["get", "list", "watch", "patch", "create"]
+    - apiGroups: ["extensions", "networking.k8s.io"]
+      resources: ["ingresses"]
+      verbs: ["get", "list", "watch", "patch", "create", "update"]
 
 ## Prod requirements
 
@@ -104,15 +105,12 @@ https://stackoverflow.com/questions/42642170/how-to-run-kubectl-commands-inside-
   - add imagePullSecrets to Deployment spec
   - add kubernetes.io/ingress.class: nginx-external to ingress annotation
 
-## Side effects
-
-  - app-name becomes a URL hence it should be URL friendly(no underscore or special characters) 
-
 ## TODOS
 
-  - compare patch and update for existing ingress
-  - create for new ingress
-  - access of sa for above verbs
+  - ~~app-name becomes a URL hence it should be URL friendly(no underscore or special characters)~~
+  - ~~compare patch and update for existing ingress~~
+  - ~~create for new ingress~~
+  - ~~access of sa for above verbs~~
 
   - deleting deployment should delete corresponding ingress path
 

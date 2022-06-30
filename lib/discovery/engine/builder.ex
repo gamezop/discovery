@@ -73,10 +73,12 @@ defmodule Discovery.Engine.Builder do
     |> generate_configuration()
     |> case do
       {:ok, conn_ref} ->
+        Utils.puts_success("K8 connection success")
         Logger.info("K8 connection success")
         conn_ref
 
       {:error, reason} ->
+        Utils.puts_error("Error while K8 conneciton due to #{inspect(reason)}")
         Logger.info("Error while K8 conneciton due to #{inspect(reason)}")
         # V2: Add connection retry for prod case
         nil

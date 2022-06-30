@@ -28,7 +28,7 @@ defmodule DiscoveryWeb.Router do
     get "/get-endpoint", EndpointController, :get_endpoint
 
     get "/apps", BaseController, :list_app
-    get "/:app/deployments", BaseController, :list_app_deployments
+    get "/:app_name/deployments", BaseController, :list_app_deployments
     post "/create-app", BaseController, :create_app
     post "/deploy-build", BaseController, :deploy_build
     post "/delete-app", BaseController, :delete_app
