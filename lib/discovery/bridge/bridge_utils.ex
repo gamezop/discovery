@@ -22,7 +22,7 @@ defmodule Discovery.Bridge.BridgeUtils do
   end
 
   @doc """
-  Fetches list of all apps created so far from bridgedb ets
+  Fetches list of all apps deleted so far from bridgedb ets
 
   Returns list()
   """
@@ -55,6 +55,19 @@ defmodule Discovery.Bridge.BridgeUtils do
   end
 
   @doc """
+  Deletes
+  - app name from bridgedb ets
+  - app from metadatadb ets
+  - deletes k8s resources
+  - deletes app folder in minikube/namespace
+  """
+  @spec delete_app(String.t()) :: {:ok, list()} | {:error, binary(), any()}
+  def delete_app(app_name) do
+    app_name
+    |> DeploymentController.delete_app()
+  end
+
+  @doc """
   Creates or updates an app deployment
 
   Returns {:ok, term} | {:error, reason}
@@ -63,5 +76,16 @@ defmodule Discovery.Bridge.BridgeUtils do
   def create_deployment(deployment_details) do
     deployment_details
     |> DeployManager.create()
+  end
+
+  @doc """
+  Deletes an app deployment
+
+  Returns {:ok, term} | {:error, reason}
+  """
+  @spec delete_deployment(DeployUtils.del_deployment()) :: {:ok, term()} | {:error, term()}
+  def delete_deployment(del_deployment_details) do
+    del_deployment_details
+    |> DeployManager.delete()
   end
 end

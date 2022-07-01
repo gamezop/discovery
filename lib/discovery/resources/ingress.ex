@@ -93,13 +93,15 @@ defmodule Discovery.Resources.Ingress do
     |> current_k8s_ingress_configuration()
     |> case do
       {:ok, ing} ->
-          ing
-          |> get_in(["spec", "rules"])
-          |> hd
-          |> get_in(["http", "paths"])
-          |> Enum.map(fn path_details ->
-            path_details
-            |> get_in(["backend", "serviceName"]) end)
+        ing
+        |> get_in(["spec", "rules"])
+        |> hd
+        |> get_in(["http", "paths"])
+        |> Enum.map(fn path_details ->
+          path_details
+          |> get_in(["backend", "serviceName"])
+        end)
+
       _ ->
         []
     end

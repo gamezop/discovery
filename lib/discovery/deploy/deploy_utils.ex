@@ -108,8 +108,10 @@ defmodule Discovery.Deploy.DeployUtils do
       delete_deployment(app)
       delete_configmap(app)
     end)
+
     Ingress.delete_operation(app_name)
     |> delete_resource(app_name)
+
     File.rm_rf("minikube/discovery/#{app_name}")
   end
 

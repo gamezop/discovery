@@ -5,6 +5,7 @@ defmodule Discovery.Controller.DeploymentController do
 
   use GenServer
 
+  alias Discovery.Deploy.DeployUtils
   alias Discovery.Utils
 
   ### CLIENT FUNCTIONS ###
@@ -25,6 +26,10 @@ defmodule Discovery.Controller.DeploymentController do
     GenServer.call(__MODULE__, {"insert_app", app_name})
   end
 
+  def delete_app(app_name) do
+    GenServer.call(__MODULE__, {"delete_app", app_name})
+  end
+
   ### SERVER CALLBACKS ###
   def init(_args) do
     Process.send_after(self(), "populate_bridgedb", 5_000)
@@ -39,6 +44,12 @@ defmodule Discovery.Controller.DeploymentController do
   def handle_call({"insert_app", app_name}, _from, state) do
     data = insert_app_to_bridgedb(app_name)
     {:reply, data, state}
+  end
+
+  def handle_call({"delete_app", app_name}, _from, state) do
+    delete_app_from_ets(app_name)
+    deleted_resources = DeployUtils.delete_app(app_name)
+    {:reply, deleted_resources, state}
   end
 
   def handle_call("get_apps", _from, state) do
@@ -72,6 +83,11 @@ defmodule Discovery.Controller.DeploymentController do
       _ ->
         {:error, :app_present}
     end
+  end
+
+  defp delete_app_from_ets(app_name) do
+    :ets.delete(Utils.bridge_db(), app_name)
+    :ets.delete(Utils.metadata_db(), app_name)
   end
 
   defp lookup_app(app_name) do
