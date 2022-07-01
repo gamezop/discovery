@@ -4,8 +4,9 @@ defmodule Discovery.Resources.Ingress do
   """
 
   alias Discovery.Deploy.DeployUtils
-  alias Discovery.Engine.Builder
   alias Discovery.Utils
+
+  import Discovery.K8Config
 
   @spec fetch_configuration(DeployUtils.app() | DeployUtils.del_deployment()) ::
           {:error, any()} | {:ok, {atom(), map()}}
@@ -79,18 +80,19 @@ defmodule Discovery.Resources.Ingress do
   - we delete app folder with ingress file, but ingress present in k8s
   - we delete ingress from k8s but ingress file present in app folder
   """
-  @spec current_k8s_ingress_configuration(String.t()) ::
+  @spec current_k8s_ingress_configuration(String.t(), K8s.Conn.t()) ::
           {:ok, map()} | {:error, any()}
-  def current_k8s_ingress_configuration(app_name) do
-    conn = Builder.get_conn()
-    operation = K8s.Client.get(api_version(), :ingress, namespace: namespace(), name: app_name)
+  def current_k8s_ingress_configuration(app_name, conn) do
+    operation =
+      K8s.Client.get(api_version(:ingress), :ingress, namespace: namespace(), name: app_name)
+
     K8s.Client.run(conn, operation)
   end
 
-  @spec get_ingress_services(String.t()) :: list
-  def get_ingress_services(app_name) do
+  @spec get_ingress_services(K8s.Conn.t(), String.t()) :: list
+  def get_ingress_services(conn, app_name) do
     app_name
-    |> current_k8s_ingress_configuration()
+    |> current_k8s_ingress_configuration(conn)
     |> case do
       {:ok, ing} ->
         ing
@@ -109,7 +111,7 @@ defmodule Discovery.Resources.Ingress do
 
   @spec delete_operation(String.t()) :: K8s.Operation.t()
   def delete_operation(name) do
-    K8s.Client.delete(api_version(), "Ingress", namespace: "discovery", name: name)
+    K8s.Client.delete(api_version(:ingress), "Ingress", namespace: namespace(), name: name)
   end
 
   @spec current_ingress_configuration(String.t()) :: {:ok, {atom(), map()}} | {:error, String.t()}
@@ -128,8 +130,9 @@ defmodule Discovery.Resources.Ingress do
     with {:ok, map} <-
            "#{:code.priv_dir(:discovery)}/templates/ingress.yml"
            |> YamlElixir.read_from_file(atoms: false),
-         map <- put_in(map["apiVersion"], api_version()),
-         map <- put_in(map["metadata"]["name"], app.app_name) do
+         map <- put_in(map["apiVersion"], api_version(:ingress)),
+         map <- put_in(map["metadata"]["name"], app.app_name),
+         map <- manage_ingress_class(map) do
       rules = map["spec"]["rules"] |> hd
       rules = put_in(rules["host"], app.app_host)
       map = put_in(map["spec"]["rules"], [rules])
@@ -139,12 +142,12 @@ defmodule Discovery.Resources.Ingress do
     end
   end
 
-  defp api_version do
-    Application.get_env(:discovery, :api_version)
-    |> Keyword.get(:ingress)
-  end
-
-  defp namespace do
-    Application.get_env(:discovery, :namespace)
+  defp manage_ingress_class(map) do
+    if Application.get_env(:discovery, :use_external_ingress_class) do
+      map
+    else
+      annotations = Map.delete(map["metadata"]["annotations"], "kubernetes.io/ingress.class")
+      put_in(map["metadata"]["annotations"], annotations)
+    end
   end
 end

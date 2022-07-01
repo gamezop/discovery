@@ -47,8 +47,8 @@ defmodule Discovery.Controller.DeploymentController do
   end
 
   def handle_call({"delete_app", app_name}, _from, state) do
-    delete_app_from_ets(app_name)
     deleted_resources = DeployUtils.delete_app(app_name)
+    delete_app_from_ets(app_name)
     {:reply, deleted_resources, state}
   end
 

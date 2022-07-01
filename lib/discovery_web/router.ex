@@ -31,8 +31,8 @@ defmodule DiscoveryWeb.Router do
     get "/:app_name/deployments", BaseController, :list_app_deployments
     post "/create-app", BaseController, :create_app
     post "/deploy-build", BaseController, :deploy_build
-    post "/delete-app", BaseController, :delete_app
-    post "/delete-deployment", BaseController, :delete_deployment
+    delete "/delete-app", BaseController, :delete_app
+    delete "/delete-deployment", BaseController, :delete_deployment
   end
 
   # Enables LiveDashboard only for development
