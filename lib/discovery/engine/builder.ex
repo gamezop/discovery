@@ -5,6 +5,12 @@ defmodule Discovery.Engine.Builder do
   """
 
   require Logger
+
+  alias Discovery.Resources.{
+    Deployment,
+    Ingress
+  }
+
   alias Discovery.Utils
   use GenServer
 
@@ -59,6 +65,7 @@ defmodule Discovery.Engine.Builder do
 
   @impl true
   def handle_info("fetch_deployment_data", state) do
+    state = %{state | deployment_info: %{}}
     updated_state = build_metadata(state)
     Process.send_after(self(), "fetch_deployment_data", @k8_fetch_interval)
     {:noreply, updated_state}
@@ -105,20 +112,17 @@ defmodule Discovery.Engine.Builder do
   defp build_metadata(%{conn_ref: nil} = state), do: state
 
   defp build_metadata(state) do
-    fetch_deployment_list(state)
+    fetch_deployment_list(state.conn_ref)
     |> update_metadata_db(state)
   end
 
   # Fetching the entire deployment data as a list for the namespace
   # [{Deployment_A, Deployment_B...., Deployment_N}]
 
-  @spec fetch_deployment_list(__MODULE__.t()) :: list(map())
-  defp fetch_deployment_list(state) do
-    response =
-      K8s.Client.list("apps/v1", "Deployment", namespace: "discovery")
-      |> then(&K8s.Client.run(state.conn_ref, &1))
-
-    case response do
+  @spec fetch_deployment_list(K8s.Conn.t()) :: list(map())
+  defp fetch_deployment_list(conn) do
+    Deployment.fetch_k8_deployments(conn)
+    |> case do
       {:ok, data} ->
         data["items"]
 
@@ -144,7 +148,8 @@ defmodule Discovery.Engine.Builder do
       "discovery" ->
         update_metadata_db(t, state)
 
-      _ ->
+      _app ->
+        # app |> IO.inspect()
         update_app_metadata(app_id, deployment, state)
         |> then(fn updated_state -> update_metadata_db(t, updated_state) end)
     end
@@ -196,15 +201,12 @@ defmodule Discovery.Engine.Builder do
   end
 
   @spec get_deployment_url(String.t(), K8s.Conn.t()) :: String.t()
-  defp get_deployment_url(app_deployment_name, connection) do
+  defp get_deployment_url(app_deployment_name, conn) do
     # app deployment names are always in a format [app_id]-[serial-id]
     case app_deployment_name |> String.split("-") do
       [app_id, path] ->
-        ingress_response =
-          K8s.Client.get("extensions/v1beta1", "ingress", namespace: "discovery", name: app_id)
-          |> then(&K8s.Client.run(connection, &1))
-
-        case ingress_response do
+        Ingress.current_k8s_ingress_configuration(app_id, conn)
+        |> case do
           {:ok, ingress_data} ->
             [rule | _rules] = ingress_data["spec"]["rules"]
             "#{rule["host"]}/#{path}"

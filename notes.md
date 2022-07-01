@@ -99,18 +99,31 @@ https://stackoverflow.com/questions/42642170/how-to-run-kubectl-commands-inside-
       resources: ["ingresses"]
       verbs: ["get", "list", "watch", "patch", "create", "update"]
 
+## Configurations
+
+  Following properties can be configured as per env
+  - connection_method (:service_account, :kube_config)
+  - namespace
+  - service_account
+  - image_pull_secret
+  - use_external_ingress_class bool
+  - use_service_account bool
+
+## Local requirements
+  - Namespace specific
+    - service account
+    - secret
+  - `use_external_ingress_class: false`
+ 
 ## Prod requirements
-
-  - add serviceAccountName to Deployment spec
-  - add imagePullSecrets to Deployment spec
-  - add kubernetes.io/ingress.class: nginx-external to ingress annotation
-
+  Namespace specific
+  - service account
+  - secret 
 ## TODOS
 
   - ~~app-name becomes a URL hence it should be URL friendly(no underscore or special characters)~~
   - ~~compare patch and update for existing ingress~~
   - ~~create for new ingress~~
   - ~~access of sa for above verbs~~
-
-  - deleting deployment should delete corresponding ingress path
+  - ~~deleting deployment should delete corresponding ingress path~~
 

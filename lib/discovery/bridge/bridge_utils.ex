@@ -83,9 +83,12 @@ defmodule Discovery.Bridge.BridgeUtils do
 
   Returns {:ok, term} | {:error, reason}
   """
-  @spec delete_deployment(DeployUtils.del_deployment()) :: {:ok, term()} | {:error, term()}
-  def delete_deployment(del_deployment_details) do
-    del_deployment_details
-    |> DeployManager.delete()
+  @spec delete_deployment(String.t()) :: {:ok, term()} | {:error, term()}
+  def delete_deployment(deployment_name) do
+    [app_name, uid] =
+      deployment_name
+      |> String.split("-")
+
+    DeployManager.delete(%{app_name: app_name, uid: uid})
   end
 end

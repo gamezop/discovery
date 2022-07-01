@@ -28,14 +28,16 @@ config :discovery,
   # available methods
   #   - :kube_config
   #   - :service_account
-  connection_method: :kube_config,
+  connection_method: :service_account,
   namespace: "discovery",
-  service_account: "discovery-service-account",
+  service_account: "discovery-sa",
   resources: %{
     limits: %{cpu: "500m", memory: "500Mi"},
     requests: %{cpu: "100m", memory: "300Mi"}
   },
-  image_pull_secrets: "dockerhub-auth-discovery"
+  image_pull_secrets: "dockerhub-auth-discovery",
+  use_external_ingress_class: false,
+  use_service_account: true
 
 config :discovery, :api_version,
   config_map: "v1",

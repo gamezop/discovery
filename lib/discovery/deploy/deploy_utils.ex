@@ -102,7 +102,9 @@ defmodule Discovery.Deploy.DeployUtils do
   # TO-DO REFACTOR ME
   @spec delete_app(binary) :: {:ok, [binary]} | {:error, atom, binary}
   def delete_app(app_name) do
-    Ingress.get_ingress_services(app_name)
+    conn = Builder.get_conn()
+
+    Ingress.get_ingress_services(conn, app_name)
     |> Enum.each(fn app ->
       delete_service(app)
       delete_deployment(app)

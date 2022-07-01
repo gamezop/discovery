@@ -58,22 +58,37 @@ defmodule DiscoveryWeb.BaseController do
   }
   @spec delete_app(Plug.Conn.t(), map) :: Plug.Conn.t()
   def delete_app(conn, params) do
-    with {:ok, params} <- Tarams.cast(params, @delete_app_params) do
+    with {:ok, params} <- Tarams.cast(params, @delete_app_params),
+         {:ok, _} <- BridgeUtils.delete_app(params.app_name) do
+      json(conn, params)
+    else
+      {:error, _} ->
+        json(put_status(conn, 400), "error")
+
+      {:error, reason, _} ->
+        json(put_status(conn, 400), "error: #{reason}")
+    end
+  end
+
+  @spec delete_deployment(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def delete_deployment(conn, params) do
+    delete_deployment_params = %{
+      deployment_name: [type: :string, required: true, cast_func: &validate_depl_name/1]
+    }
+
+    with {:ok, params} <- Tarams.cast(params, delete_deployment_params),
+         {:ok, _} <- BridgeUtils.delete_deployment(params.deployment_name) do
       json(conn, params)
     else
       {:error, _} -> json(put_status(conn, 400), "error")
     end
   end
 
-  @delete_deployment_params %{
-    deployment_name: [type: :string, required: true]
-  }
-  @spec delete_deployment(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def delete_deployment(conn, params) do
-    with {:ok, params} <- Tarams.cast(params, @delete_deployment_params) do
-      json(conn, params)
+  defp validate_depl_name(deployment_name) do
+    if deployment_name |> String.split("-") |> length() == 2 do
+      {:ok, deployment_name}
     else
-      {:error, _} -> json(put_status(conn, 400), "error")
+      {:error, "validate deployment name: appname-uid"}
     end
   end
 end
