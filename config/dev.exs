@@ -67,3 +67,15 @@ config :phoenix, :stacktrace_depth, 20
 config :phoenix, :plug_init_mode, :runtime
 
 config :discovery, :base_url, "http://localhost:4000"
+
+config :discovery,
+  connection_method: :kube_config,
+  namespace: "discovery",
+  service_account: "discovery-service-account",
+  resources: %{
+    limits: %{cpu: "500m", memory: "500Mi"},
+    requests: %{cpu: "100m", memory: "300Mi"}
+  },
+  image_pull_secrets: "ghostdsb-auth-discovery",
+  use_external_ingress_class: false,
+  use_service_account: true

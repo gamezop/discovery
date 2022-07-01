@@ -19,6 +19,21 @@ defmodule Discovery.Engine.Reader do
     end
   end
 
+  @doc """
+  Returns deployments for given app name.
+  """
+  @spec get_deployments(String.t()) :: list()
+  def get_deployments(app_name) do
+    case :ets.lookup(Utils.metadata_db(), app_name) do
+      [{_room_name, deployments}] ->
+        deployments
+        |> sort_by_date()
+
+      _ ->
+        []
+    end
+  end
+
   @spec get_latest_deployment_url(map()) :: String.t()
   defp get_latest_deployment_url(nil), do: ""
 
@@ -39,5 +54,15 @@ defmodule Discovery.Engine.Reader do
       ) === :gt
     end)
     |> List.first()
+  end
+
+  defp sort_by_date(app_deployments) do
+    app_deployments
+    |> Enum.sort(fn {_k1, details_a}, {_k2, details_b} ->
+      DateTime.compare(
+        details_a["last_updated"],
+        details_b["last_updated"]
+      ) === :gt
+    end)
   end
 end

@@ -79,10 +79,10 @@ https://stackoverflow.com/questions/42642170/how-to-run-kubectl-commands-inside-
 
 - [PROBLEM]Inconsistency in connecting to remote k8s locally via kube config file
 
-1. Authentication using service account.
-  - Try to connect locally to dev k8s.
-2. Deploying to dev, integrating with tic-tac-toe.
-3. Create, delete deployment api.
+1. ~~Authentication using service account.~~
+  - ~~Try to connect locally to dev k8s.~~
+2. ~~Deploying to dev, integrating with tic-tac-toe.~~
+3. ~~Create, delete deployment api.~~
 4. Deploying to prod with tictactoe.
 
 ## Service account
@@ -126,4 +126,5 @@ https://stackoverflow.com/questions/42642170/how-to-run-kubectl-commands-inside-
   - ~~create for new ingress~~
   - ~~access of sa for above verbs~~
   - ~~deleting deployment should delete corresponding ingress path~~
+  - ~~deleting zombie deployments 1 hour old~~
 
