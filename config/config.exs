@@ -23,6 +23,12 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+config :discovery, Discovery.Scheduler,
+  jobs: [
+    # Runs every midnight IST:
+    {"30 5 * * *", {Discovery.Engine.Cleaner, :execute, []}}
+  ]
+
 config :discovery,
   # Connection method for K8s
   # available methods

@@ -8,6 +8,7 @@ defmodule Discovery.Application do
   alias Discovery.Controller.DeploymentController
   alias Discovery.Deploy.DeployManager
   alias Discovery.Engine.Builder
+  alias Discovery.Scheduler
   alias Discovery.Utils
 
   require Logger
@@ -22,7 +23,8 @@ defmodule Discovery.Application do
       DiscoveryWeb.Endpoint,
       {Builder, []},
       {DeploymentController, []},
-      {DeployManager, []}
+      {DeployManager, []},
+      Scheduler
       # Start a worker by calling: Discovery.Worker.start_link(arg)
       # {Discovery.Worker, arg}
     ]
