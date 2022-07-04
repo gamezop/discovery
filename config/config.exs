@@ -42,7 +42,7 @@ config :discovery,
     requests: %{cpu: "100m", memory: "300Mi"}
   },
   image_pull_secrets: "dockerhub-auth-discovery",
-  use_external_ingress_class: false,
+  use_external_ingress_class: true,
   use_service_account: true
 
 config :discovery, :api_version,
