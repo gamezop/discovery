@@ -1,0 +1,11 @@
+## DONOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING ##
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: APP_NAME-UID
+  namespace: discovery
+data:
+  SECRET_KEY_BASE: "4laT1zUJr1+P3fqIUS7bGr4lRywKNBzFBN2eHDpDWdeGwxDqz9VUDDw/J58Ovyro"
+  PORT: "3245"
+  ENTERPRISE_PORT: "3245"
+  ENTERPRISE_JWT_KEY: "3^?&dNscPa-R#L[)?9r]Zwyg~,+/jB3^?&dNscPa-R#L[)?9r]Zwyg~,+/jB"

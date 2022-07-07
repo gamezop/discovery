@@ -2,6 +2,7 @@ defmodule DiscoveryWeb.PageLive do
   @moduledoc false
   use DiscoveryWeb, :live_view
   alias Discovery.Bridge.BridgeUtils
+  alias Discovery.Deploy.DeployUtils
   @impl true
   def mount(_params, _session, socket) do
     {:ok,
@@ -50,7 +51,7 @@ defmodule DiscoveryWeb.PageLive do
   @impl true
   def handle_event("create-deployment", %{"app-image" => app_image} = _params, socket) do
     if socket.assigns.modal_input? do
-      %{
+      %DeployUtils{
         app_name: socket.assigns.selected_app,
         app_image: app_image
       }

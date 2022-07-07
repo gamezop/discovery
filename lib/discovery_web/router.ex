@@ -7,6 +7,7 @@ defmodule DiscoveryWeb.Router do
     plug :fetch_live_flash
     plug :put_root_layout, {DiscoveryWeb.LayoutView, :root}
     plug :protect_from_forgery
+    plug CORSPlug, origin: "*"
     plug :put_secure_browser_headers
   end
 
@@ -25,6 +26,13 @@ defmodule DiscoveryWeb.Router do
   scope "/api", DiscoveryWeb do
     pipe_through :api
     get "/get-endpoint", EndpointController, :get_endpoint
+
+    get "/apps", BaseController, :list_app
+    get "/:app_name/deployments", BaseController, :list_app_deployments
+    post "/create-app", BaseController, :create_app
+    post "/deploy-build", BaseController, :deploy_build
+    delete "/delete-app", BaseController, :delete_app
+    delete "/delete-deployment", BaseController, :delete_deployment
   end
 
   # Enables LiveDashboard only for development
