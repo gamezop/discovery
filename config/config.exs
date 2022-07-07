@@ -36,14 +36,15 @@ config :discovery,
   #   - :service_account
   connection_method: :service_account,
   namespace: "discovery",
-  service_account: "discovery-sa",
   resources: %{
     limits: %{cpu: "500m", memory: "500Mi"},
     requests: %{cpu: "100m", memory: "300Mi"}
   },
-  image_pull_secrets: "dockerhub-auth-discovery",
+  use_service_account: true,
+  service_account: "discovery-sa",
   use_external_ingress_class: true,
-  use_service_account: true
+  ingress_class: "nginx-external",
+  image_pull_secrets: "dockerhub-auth-discovery"
 
 config :discovery, :api_version,
   config_map: "v1",

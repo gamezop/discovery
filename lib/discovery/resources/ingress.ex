@@ -144,7 +144,11 @@ defmodule Discovery.Resources.Ingress do
 
   defp manage_ingress_class(map) do
     if Application.get_env(:discovery, :use_external_ingress_class) do
-      map
+      put_in(
+        map,
+        ["metadata", "annotations", "kubernetes.io/ingress.class"],
+        Application.get_env(:discovery, :ingress_class)
+      )
     else
       annotations = Map.delete(map["metadata"]["annotations"], "kubernetes.io/ingress.class")
       put_in(map["metadata"]["annotations"], annotations)
