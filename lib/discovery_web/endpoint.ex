@@ -39,7 +39,14 @@ defmodule DiscoveryWeb.Endpoint do
     cookie_key: "request_logger"
 
   plug Plug.RequestId
-  plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
+
+  plug Plug.Telemetry,
+    event_prefix: [:phoenix, :endpoint],
+    log: {__MODULE__, :log_level, []}
+
+  # Disables logging for routes like /ping/*
+  def log_level(%{path_info: ["ping" | _]}), do: false
+  def log_level(_), do: :info
 
   plug Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json],

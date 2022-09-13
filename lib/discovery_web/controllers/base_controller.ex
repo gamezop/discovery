@@ -3,6 +3,10 @@ defmodule DiscoveryWeb.BaseController do
 
   alias Discovery.Bridge.BridgeUtils
 
+  def ping(conn, _params) do
+    json(conn, "pong from discovery: v#{Application.spec(:discovery, :vsn)}")
+  end
+
   @spec list_app(Plug.Conn.t(), any) :: Plug.Conn.t()
   def list_app(conn, _params) do
     app_list = BridgeUtils.get_apps()
