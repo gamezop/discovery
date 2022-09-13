@@ -22,6 +22,8 @@ defmodule DiscoveryWeb.Router do
     live "/", PageLive, :index
   end
 
+  get "/ping", DiscoveryWeb.BaseController, :ping, log: false
+
   # Other scopes may use custom stacks.
   scope "/api", DiscoveryWeb do
     pipe_through :api

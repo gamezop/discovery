@@ -1,4 +1,4 @@
-VERSION_DEV = 0.1.36
+VERSION_DEV = 0.2.1
 VERSION_PROD = 0.1.0
 
 commit:
