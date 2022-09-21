@@ -1,0 +1,16 @@
+## DONOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING ##
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx-external
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/upstream-hash-by: "$uid"
+  name: enterprise
+  namespace: discovery
+spec:
+  rules:
+  - host: dev-enterprisek8.skillclash.com
+    http:
+      paths:
+      - 
