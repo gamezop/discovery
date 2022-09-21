@@ -14,9 +14,17 @@ defmodule Discovery.Deploy.DeployManager do
   @doc """
   Creates/updates a deployment
   """
-  @spec create(DeplouUtis.t()) :: any()
+  @spec create(DeployUtils.t()) :: any()
   def create(deploy_details) do
     GenServer.call(__MODULE__, {:create, deploy_details}, :infinity)
+  end
+
+  @doc """
+  Deletes a deployment
+  """
+  @spec delete(DeployUtils.del_deployment()) :: any()
+  def delete(deploy_details) do
+    GenServer.call(__MODULE__, {:delete, deploy_details}, :infinity)
   end
 
   ## Server callbacks
@@ -31,6 +39,12 @@ defmodule Discovery.Deploy.DeployManager do
   @impl true
   def handle_call({:create, deploy_details}, _from, state) do
     status_data = DeployUtils.create(deploy_details)
+    {:reply, status_data, state}
+  end
+
+  @impl true
+  def handle_call({:delete, deploy_details}, _from, state) do
+    status_data = DeployUtils.delete_app_deployment(deploy_details)
     {:reply, status_data, state}
   end
 end

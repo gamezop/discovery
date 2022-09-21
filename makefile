@@ -1,4 +1,4 @@
-VERSION_DEV = 0.1.0_dev-staging
+VERSION_DEV = 0.2.1
 VERSION_PROD = 0.1.0
 
 commit:
@@ -38,21 +38,23 @@ dev-release:
 	mix release
 
 builddockerprod: 
-	docker build --tag discovery .
-	docker tag discovery discovery:$(VERSION_PROD)
+	docker build --tag gamezop/discovery .
+	docker tag gamezop/discovery gamezop/discovery:$(VERSION_PROD)
 
 builddockerdev: 
-	docker build --file devDockerfile --tag discovery .
-	docker tag discovery discovery:$(VERSION_DEV)
+	docker build --file dev.Dockerfile --tag gamezop/discovery .
+	docker tag gamezop/discovery gamezop/discovery:$(VERSION_DEV)
 
-# pushdockerdev: builddockerdev
-# 	docker push discovery:$(VERSION_DEV)
+pushdockerdev: builddockerdev
+	docker push gamezop/discovery:$(VERSION_DEV)
 
 # pushdockerprod: builddockerprod
-# 	docker push discovery:$(VERSION_PROD)
+# 	docker push gamezop/discovery:$(VERSION_PROD)
 
 rundockerprod: 
-	docker run --name disovery-$(VERSION_PROD) --publish 6968:6968 --detach --env DISCOVERY_PORT=6968 --env SECRET_KEY_BASE=${SECRET_KEY_BASE} disovery:$(VERSION_PROD)
+	docker run --name discovery-$(VERSION_PROD) --publish 6968:6968 --detach --env DISCOVERY_PORT=6968 \
+	--env SECRET_KEY_BASE=${SECRET_KEY_BASE} gamezop/discovery:$(VERSION_PROD)
 
 rundockerdev: builddockerdev
-	docker run --name disovery-$(VERSION_DEV) --publish 6966:6966 --detach --env DISCOVERY_PORT=6966 --env SECRET_KEY_BASE=${SECRET_KEY_BASE} disovery:$(VERSION_DEV)
+	docker run --name discovery-$(VERSION_DEV) --publish 6966:6966 --detach --env DISCOVERY_PORT=6966 \
+	--env SECRET_KEY_BASE=${SECRET_KEY_BASE} gamezop/discovery:$(VERSION_DEV)

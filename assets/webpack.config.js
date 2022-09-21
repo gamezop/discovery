@@ -22,7 +22,9 @@ module.exports = (env, options) => {
     output: {
       filename: '[name].js',
       path: path.resolve(__dirname, '../priv/static/js'),
-      publicPath: '/js/'
+      publicPath: '/js/',
+      library: '[name]',
+      libraryTarget: "umd"
     },
     devtool: devMode ? 'eval-cheap-module-source-map' : undefined,
     module: {

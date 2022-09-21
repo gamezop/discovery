@@ -11,12 +11,14 @@ import Config
 # before starting your production server.
 config :discovery, DiscoveryWeb.Endpoint,
   url: [host: "0.0.0.0", port: 80],
-  cache_static_manifest: "priv/static/cache_manifest.json"
+  cache_static_manifest: "priv/static/cache_manifest.json",
+  check_origin: false
 
 # Do not print debug messages in production
 config :logger, level: :info
 
-config :discovery, :base_url, "https://discoveryk8.skillclash.com"
+config :discovery, :base_url, "https://dev-discoveryk8.skillclash.com"
+
 # ## SSL Support
 #
 # To get SSL working, you will need to add the `https` key
@@ -24,7 +26,7 @@ config :discovery, :base_url, "https://discoveryk8.skillclash.com"
 #
 #     config :discovery, DiscoveryWeb.Endpoint,
 #       ...
-#       url: [host: "0.0.0.0", port: 443],
+#       url: [host: "example.com", port: 443],
 #       https: [
 #         port: 443,
 #         cipher_suite: :strong,
