@@ -56,6 +56,17 @@ config :discovery, DiscoveryWeb.Endpoint,
     ]
   ]
 
+# uncomment for testing on localhost for quizzop question upload module
+config :ex_aws, :s3,
+  scheme: "http://",
+  region: "ap-south-1",
+  host: "localhost",
+  port: 4566
+
+config :discovery,
+  discovery_bucket: "dev-discovery",
+  discovery_bucket_url: "https://dev-discovery.gamezop.com"
+
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
 
