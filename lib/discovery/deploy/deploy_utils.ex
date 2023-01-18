@@ -133,8 +133,13 @@ defmodule Discovery.Deploy.DeployUtils do
       File.write!(namespace_file_location, namespace_template)
 
       bucket = Application.get_env(:discovery, :discovery_bucket)
+
+      # uploads namespace to S3
       Discovery.S3Uploader.upload_file(namespace_file_location, bucket, namespace_file_location)
 
+      # downloads all files from S3, its ok if we rewrite namespace, by this we get the config files already
+      # uploaded to S3 by previous deployment
+      Discovery.S3Uploader.download_contents(bucket)
       Utils.puts_warn("RUNNING NAMESPACE: discovery")
     end
   end
