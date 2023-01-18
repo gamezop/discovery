@@ -56,6 +56,9 @@ defmodule Discovery.MixProject do
       {:quantum, "~> 3.0"},
       {:yaml_elixir, "~> 2.9.0"},
       {:tarams, "~> 1.6.1"},
+      {:ex_aws, "~> 2.1", override: true},
+      {:ex_aws_s3, "~> 2.0"},
+      {:sweet_xml, "~> 0.6"},
       {:yamlix, git: "https://github.com/ghostdsb/yamlix.git", branch: "master"}
       # {:yamlix, path: "../ext-modules/yamlix"}
     ]

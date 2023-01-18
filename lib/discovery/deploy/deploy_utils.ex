@@ -103,6 +103,7 @@ defmodule Discovery.Deploy.DeployUtils do
   @spec delete_app(binary) :: {:ok, [binary]} | {:error, atom, binary}
   def delete_app(app_name) do
     conn = Builder.get_conn()
+    bucket = Application.get_env(:discovery, :discovery_bucket)
 
     Ingress.get_ingress_services(conn, app_name)
     |> Enum.each(fn app ->
@@ -114,17 +115,26 @@ defmodule Discovery.Deploy.DeployUtils do
     Ingress.delete_operation(app_name)
     |> delete_resource(app_name)
 
-    File.rm_rf("minikube/discovery/#{app_name}")
+    app_location = "minikube/discovery/#{app_name}"
+
+    File.rm_rf(app_location)
+    |> then(fn _ -> Discovery.S3Uploader.delete_content(bucket, app_location) end)
   end
 
   @spec create_namespace_directory :: :ok
   def create_namespace_directory do
-    if File.exists?("minikube/discovery/namespace.yml") do
+    namespace_file_location = "minikube/discovery/namespace.yml"
+
+    if File.exists?(namespace_file_location) do
       Utils.puts_warn("NAMESPACE DIRECTORY EXISTS")
     else
-      File.mkdir_p!(Path.dirname("minikube/discovery/namespace.yml"))
+      File.mkdir_p!(Path.dirname(namespace_file_location))
       namespace_template = File.read!("#{:code.priv_dir(:discovery)}/templates/namespace.yml")
-      File.write!("minikube/discovery/namespace.yml", namespace_template)
+      File.write!(namespace_file_location, namespace_template)
+
+      bucket = Application.get_env(:discovery, :discovery_bucket)
+      Discovery.S3Uploader.upload_file(namespace_file_location, bucket, namespace_file_location)
+
       Utils.puts_warn("RUNNING NAMESPACE: discovery")
     end
   end
@@ -145,9 +155,13 @@ defmodule Discovery.Deploy.DeployUtils do
 
   @spec delete_app_version_folder(del_deployment()) :: {:ok, list()} | {:error, String.t()}
   defp delete_app_version_folder(app) do
-    File.rm_rf("minikube/discovery/#{app.app_name}/#{app.app_name}-#{app.uid}")
+    app_version_location = "minikube/discovery/#{app.app_name}/#{app.app_name}-#{app.uid}"
+    bucket = Application.get_env(:discovery, :discovery_bucket)
+
+    File.rm_rf(app_version_location)
     |> case do
       {:ok, list} ->
+        Discovery.S3Uploader.delete_content(bucket, app_version_location)
         {:ok, list}
 
       {:error, reason, _} ->
