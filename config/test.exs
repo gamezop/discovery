@@ -19,7 +19,6 @@ config :ex_aws,
   access_key_id: "secret",
   secret_access_key: "secret"
 
-
 config :discovery,
   discovery_bucket: "discovery_bucket",
   discovery_bucket_url: "discovery_bucket_url"
