@@ -29,18 +29,23 @@ defmodule Discovery.S3Uploader do
   end
 
   def download_contents(bucket) do
-    {:ok, %{body: %{contents: contents}}} = ExAws.S3.list_objects(bucket) |> ExAws.request()
+    with operation <- ExAws.S3.list_objects(bucket),
+         {:ok, %{body: %{contents: contents}}} <- ExAws.request(operation) do
+      contents
+      |> Enum.each(fn content ->
+        data = download(bucket, content.key)
 
-    contents
-    |> Enum.each(fn content ->
-      data = download(bucket, content.key)
+        Path.dirname(content.key)
+        |> File.mkdir_p()
 
-      Path.dirname(content.key)
-      |> File.mkdir_p()
-
-      {:ok, file} = File.open(content.key, [:write, :utf8, :binary])
-      IO.write(file, data)
-    end)
+        {:ok, file} = File.open(content.key, [:write, :utf8, :binary])
+        IO.write(file, data)
+      end)
+    else
+      {:error, reason} ->
+        Logger.error("error in downloading from S3 #{inspect(reason)}")
+        {:error, "error in downloading from S3 #{inspect(reason)}"}
+    end
   end
 
   def delete_content(bucket, object) do
