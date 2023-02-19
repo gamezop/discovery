@@ -59,7 +59,7 @@ config :discovery,
 config :discovery, :api_version,
   config_map: "v1",
   deployment: "apps/v1",
-  ingress: "networking.k8s.io/v1beta1",
+  ingress: "networking.k8s.io/v1",
   namespace: "v1",
   service: "v1"
 
