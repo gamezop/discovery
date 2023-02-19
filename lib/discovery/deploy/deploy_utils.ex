@@ -153,7 +153,7 @@ defmodule Discovery.Deploy.DeployUtils do
     end
   end
 
-  @spec create_app_folder(app()) :: :ok | {:error, term()}
+  @spec create_app_version_folder(app()) :: :ok | {:error, term()}
   defp create_app_version_folder(app) do
     File.mkdir("minikube/discovery/#{app.app_name}/#{app.app_name}-#{app.uid}")
   end
@@ -283,7 +283,7 @@ defmodule Discovery.Deploy.DeployUtils do
 
   @spec patch_resource(String.t()) :: :ok | {:error, String.t()}
   defp patch_resource(resource) do
-    Utils.puts_warn("RUNNING RESOURCE: #{resource}")
+    Utils.puts_warn("PATCHING RESOURCE: #{resource}")
 
     with conn when not is_nil(conn) <- Builder.get_conn(),
          {:ok, resource_map} <- K8s.Resource.from_file(resource),
