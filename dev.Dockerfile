@@ -20,8 +20,8 @@ ENV MIX_ENV="${MIX_ENV}"
 
 # install mix dependencies
 COPY mix.exs mix.lock ./
-RUN mix deps.get --only $MIX_ENV
-RUN mkdir config
+COPY config config
+RUN mix do deps.get, deps.compile
 
 # copy compile-time config files before we compile dependencies
 # to ensure any relevant config change will trigger the dependencies

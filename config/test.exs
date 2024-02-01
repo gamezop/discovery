@@ -8,3 +8,17 @@ config :discovery, DiscoveryWeb.Endpoint,
 
 # Print only warnings and errors during test
 config :logger, level: :warn
+
+config :ex_aws, :s3,
+  scheme: "http://",
+  region: "ap-south-1",
+  host: "localhost",
+  port: 4566
+
+config :ex_aws,
+  access_key_id: "secret",
+  secret_access_key: "secret"
+
+config :discovery,
+  discovery_bucket: "discovery_bucket",
+  discovery_bucket_url: "discovery_bucket_url"
