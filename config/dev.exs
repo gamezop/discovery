@@ -82,7 +82,8 @@ config :discovery, :base_url, "http://localhost:4000"
 config :discovery,
   connection_method: :kube_config,
   namespace: "discovery",
-  service_account: "discovery-service-account",
+  ## "discovery-service-account",
+  service_account: "default",
   resources: %{
     limits: %{cpu: "500m", memory: "500Mi"},
     requests: %{cpu: "100m", memory: "300Mi"}
@@ -90,3 +91,10 @@ config :discovery,
   image_pull_secrets: "ghostdsb-auth-discovery",
   use_external_ingress_class: false,
   use_service_account: true
+
+# config :discovery, :api_version,
+#   config_map: "v1",
+#   deployment: "apps/v1",
+#   ingress: "networking.k8s.io/v1beta1",
+#   namespace: "v1",
+#   service: "v1"

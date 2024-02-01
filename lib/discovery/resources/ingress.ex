@@ -23,6 +23,7 @@ defmodule Discovery.Resources.Ingress do
   def add_ingress_path(current_ingress_map, app) do
     new_path = %{
       "path" => "/#{app.uid}(/|$)(.*)",
+      # "pathType" => "ImplementationSpecific",
       "backend" => %{
         "serviceName" => "#{app.app_name}-#{app.uid}",
         "servicePort" => 80
