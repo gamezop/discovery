@@ -24,9 +24,14 @@ defmodule Discovery.Resources.Ingress do
     new_path = %{
       "path" => "/#{app.uid}(/|$)(.*)",
       # "pathType" => "ImplementationSpecific",
+      "pathType" => "Prefix",
       "backend" => %{
-        "serviceName" => "#{app.app_name}-#{app.uid}",
-        "servicePort" => 80
+        "service" => %{
+          "name" => "#{app.app_name}-#{app.uid}",
+          "port" => %{
+            "number" => 80
+          }
+        }
       }
     }
 
