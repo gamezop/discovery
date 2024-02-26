@@ -107,7 +107,7 @@ defmodule Discovery.Resources.Ingress do
         |> get_in(["http", "paths"])
         |> Enum.map(fn path_details ->
           path_details
-          |> get_in(["backend", "serviceName"])
+          |> get_in(["backend", "service", "name"])
         end)
 
       _ ->
