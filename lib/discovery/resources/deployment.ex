@@ -7,56 +7,65 @@ defmodule Discovery.Resources.Deployment do
 
   import Discovery.K8Config
 
+  @template_path "#{:code.priv_dir(:discovery)}/templates/deploy.yml"
+
   @spec create_deployment(DeployUtils.app()) :: {:error, any()} | {:ok, map()}
   def create_deployment(app) do
-    with {:ok, map} <-
-           "#{:code.priv_dir(:discovery)}/templates/deploy.yml"
-           |> YamlElixir.read_from_file(atoms: false),
-         map <- put_in(map["apiVersion"], api_version(:deployment)),
-         map <- put_in(map, ["metadata", "name"], "#{app.app_name}-#{app.uid}"),
-         map <- put_in(map, ["metadata", "annotations", "app_id"], "#{app.app_name}"),
-         map <- add_service_account(map),
-         map <-
-           put_in(map, ["spec", "selector", "matchLabels", "app"], "#{app.app_name}-#{app.uid}"),
-         map <-
-           put_in(map, ["spec", "template", "spec", "imagePullSecrets"], [
-             %{"name" => Application.get_env(:discovery, :image_pull_secrets)}
-           ]),
-         map <-
-           put_in(
-             map,
-             ["spec", "template", "metadata", "labels", "app"],
-             "#{app.app_name}-#{app.uid}"
-           ) do
-      deployment_container = map["spec"]["template"]["spec"]["containers"] |> hd
-
-      deployment_container =
-        put_in(deployment_container["envFrom"], [
-          %{
-            "configMapRef" => %{"name" => "#{app.app_name}-#{app.uid}"}
-          }
-        ])
-
-      deployment_container = put_in(deployment_container["image"], "#{app.app_image}")
-      deployment_container = put_in(deployment_container["name"], "#{app.app_name}")
-
-      deployment_container =
-        put_in(deployment_container["ports"], [
-          %{
-            "containerPort" => app.app_container_port,
-            "name" => "#{app.app_name}-port",
-            "protocol" => "TCP"
-          }
-        ])
-
-      deployment_container = put_in(deployment_container["resources"], resources())
-
-      map = put_in(map["spec"]["template"]["spec"]["containers"], [deployment_container])
-
-      {:ok, map}
+    with {:ok, map} <- read_deployment_template(),
+         updated_map <- update_deployment_map(map, app),
+         {:ok, updated_map} <- update_container(updated_map, app),
+         {:ok, final_map} <- update_labels(updated_map, app) do
+      {:ok, final_map}
     else
       {:error, _} -> {:error, "error in creating deployment config"}
     end
+  end
+
+  defp read_deployment_template() do
+    "#{@template_path}"
+    |> YamlElixir.read_from_file(atoms: false)
+  end
+
+  defp update_deployment_map(map, app) do
+    map =
+      map
+      |> put_in(["apiVersion"], api_version(:deployment))
+      |> put_in(["metadata", "name"], "#{app.app_name}-#{app.uid}")
+      |> put_in(["metadata", "annotations", "app_id"], "#{app.app_name}")
+      |> add_service_account()
+      |> put_in(["spec", "selector", "matchLabels", "app"], "#{app.app_name}-#{app.uid}")
+      |> put_in(["spec", "template", "spec", "nodeSelector"], %{
+        "kubernetes.io/arch" => Application.get_env(:discovery, :kubernetes_arch)
+      })
+      |> put_in(["spec", "template", "spec", "imagePullSecrets"], [
+        %{"name" => Application.get_env(:discovery, :image_pull_secrets)}
+      ])
+
+    {:ok, map}
+  end
+
+  defp update_container(map, app) do
+    [deployment_container | _] = get_in(map, ["spec", "template", "spec", "containers"])
+
+    deployment_container =
+      deployment_container
+      |> put_in(["envFrom"], [%{"configMapRef" => %{"name" => "#{app.app_name}-#{app.uid}"}}])
+      |> put_in(["image"], "#{app.app_image}")
+      |> put_in(["name"], "#{app.app_name}")
+      |> put_in(["ports"], [
+        %{
+          "containerPort" => app.app_container_port,
+          "name" => "#{app.app_name}-port",
+          "protocol" => "TCP"
+        }
+      ])
+      |> put_in(["resources"], resources())
+
+    map |> put_in(["spec", "template", "spec", "containers"], [deployment_container])
+  end
+
+  defp update_labels(map, app) do
+    map |> put_in(["spec", "template", "metadata", "labels", "app"], "#{app.app_name}-#{app.uid}")
   end
 
   @spec write_to_file(map, String.t()) :: :ok

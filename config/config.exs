@@ -54,7 +54,8 @@ config :discovery,
   service_account: "discovery-sa",
   use_external_ingress_class: true,
   ingress_class: "nginx-external",
-  image_pull_secrets: "dockerhub-auth-discovery"
+  image_pull_secrets: "dockerhub-auth-discovery",
+  kubernetes_arch: "amd64"
 
 config :discovery, :api_version,
   config_map: "v1",

@@ -21,6 +21,8 @@ spec:
       labels:
         app: APP_NAME-UID
     spec:
+      nodeSelector:
+        kubernetes.io/arch: amd64
       serviceAccountName: discovery-sa
       containers:
       - name: APP_NAME
