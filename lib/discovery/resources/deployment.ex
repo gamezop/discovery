@@ -21,7 +21,7 @@ defmodule Discovery.Resources.Deployment do
     end
   end
 
-  defp read_deployment_template() do
+  defp read_deployment_template do
     "#{@template_path}"
     |> YamlElixir.read_from_file(atoms: false)
   end
