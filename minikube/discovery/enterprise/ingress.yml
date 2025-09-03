@@ -1,0 +1,35 @@
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/upstream-hash-by: "$uid"
+  name: enterprise
+  namespace: discovery
+spec:
+  rules:
+  - host: enterprise.minikube.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: enterprise-aeee5862
+            port:
+              number: 80
+        path: /aeee5862(/|$)(.*)
+        pathType: Prefix
+      - backend:
+          service:
+            name: enterprise-33bc347e
+            port:
+              number: 80
+        path: /33bc347e(/|$)(.*)
+        pathType: Prefix
+      - backend:
+          service:
+            name: enterprise-2e6ab780
+            port:
+              number: 80
+        path: /2e6ab780(/|$)(.*)
+        pathType: Prefix
