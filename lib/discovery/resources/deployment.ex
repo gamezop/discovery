@@ -12,7 +12,7 @@ defmodule Discovery.Resources.Deployment do
   @spec create_deployment(DeployUtils.app()) :: {:error, any()} | {:ok, map()}
   def create_deployment(app) do
     with {:ok, map} <- read_deployment_template(),
-         updated_map <- update_deployment_map(map, app),
+         {:ok, updated_map} <- update_deployment_map(map, app),
          {:ok, updated_map} <- update_container(updated_map, app),
          {:ok, final_map} <- update_labels(updated_map, app) do
       {:ok, final_map}
@@ -61,11 +61,16 @@ defmodule Discovery.Resources.Deployment do
       ])
       |> put_in(["resources"], resources())
 
-    map |> put_in(["spec", "template", "spec", "containers"], [deployment_container])
+    map =
+      map
+      |> put_in(["spec", "template", "spec", "containers"], [deployment_container])
+
+    {:ok, map}
   end
 
   defp update_labels(map, app) do
-    map |> put_in(["spec", "template", "metadata", "labels", "app"], "#{app.app_name}-#{app.uid}")
+    map = map |> put_in(["spec", "template", "metadata", "labels", "app"], "#{app.app_name}-#{app.uid}")
+    {:ok, map}
   end
 
   @spec write_to_file(map, String.t()) :: :ok
