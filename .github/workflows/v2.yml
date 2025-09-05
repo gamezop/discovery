@@ -1,0 +1,157 @@
+name: Discovery K8s CI/CD Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      env:
+        description: "Environment"
+        required: true
+        default: "develop"
+        type: choice
+        options:
+          - develop
+          - staging
+  push:
+    tags:
+      - '*.*.*'
+
+jobs:
+  build_and_push_image:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
+    env:
+      GITHUB_ACCESS_TOKEN: ${{ secrets.GO_MODULES_GITHUB_TOKEN }}
+    outputs:
+      version_tag: ${{ steps.set_version.outputs.version }}
+      docker_tag: ${{ steps.tag_logic.outputs.final_tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
+          buildkitd-flags: --allow-insecure-entitlement security.insecure
+          install: true
+          use: true
+
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.ref_name }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Run Elixir compile check
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: '1.14.0'
+          otp-version: '25.0'
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Set tag env
+        id: set_version
+        run: |
+          VERSION="$(elixir -e 'mixfile = File.read!("mix.exs"); [_, v] = Regex.run(~r/version: "(.*?)"/, mixfile); IO.puts(v)')"
+          echo "PHX_APP_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Detected version: $VERSION"
+
+      - name: Determine Docker tag
+        id: tag_logic
+        run: |
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            TAG="${PHX_APP_VERSION}"
+          else
+            TAG="${PHX_APP_VERSION}-${{ github.run_id }}"
+          fi
+          echo "Final image tag: $TAG"
+          echo "final_tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Validate mix.exs version against Git tag
+        if: github.event_name == 'push'
+        run: |
+          GIT_TAG="${GITHUB_REF#refs/tags/}"
+          echo "mix.exs version: ${PHX_APP_VERSION}"
+          echo "Git tag: $GIT_TAG"
+          
+          if [ "${PHX_APP_VERSION}" != "$GIT_TAG" ]; then
+            echo "❌ mix.exs version ($PHX_APP_VERSION) does not match Git tag ($GIT_TAG)"
+            exit 1
+          else
+            echo "✅ mix.exs version matches Git tag"
+          fi
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./dockerfiles/Dockerfile
+          push: true
+          tags: gamezop/discovery:${{ steps.tag_logic.outputs.final_tag }}
+          build-args: |
+            MIX_ENV=${{ github.event.inputs.env || 'prod' }}
+          secrets: |
+            github_token=${{ secrets.GO_MODULES_GITHUB_TOKEN }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+  deploy_dev:
+    if: github.event.inputs.env == 'develop'
+    needs: [build_and_push_image]
+    runs-on: ubuntu-latest
+    env:
+      DEPLOY_TAG: ${{ needs.build_and_push_image.outputs.docker_tag }}
+    steps:
+      - name: Set Jenkins Variables
+        run: |
+            echo "JENKINS_URL=${{ secrets.DEV_JENKINS_URL }}" >> $GITHUB_ENV
+            echo "JENKINS_TOKEN=${{ secrets.DEV_JENKINS_TOKEN }}" >> $GITHUB_ENV
+            echo "JENKINS_JOB=k8s-discovery-deployment" >> $GITHUB_ENV
+      - name: Trigger Jenkins Deployment
+        run: |
+          echo "Triggering deploy with tag: $DEPLOY_TAG"
+          curl -u ${{ env.JENKINS_TOKEN }} -X POST \
+            "https://${{ env.JENKINS_URL }}/job/${{ env.JENKINS_JOB }}/buildWithParameters?TAG=$DEPLOY_TAG"
+
+  deploy_staging:
+    if: github.event.inputs.env == 'staging'
+    needs: [build_and_push_image]
+    runs-on: ubuntu-latest
+    env:
+      DEPLOY_TAG: ${{ needs.build_and_push_image.outputs.docker_tag }}
+    steps:
+      - name: Set Jenkins Variables
+        run: |
+            echo "JENKINS_URL=${{ secrets.PROD_JENKINS_URL }}" >> $GITHUB_ENV
+            echo "JENKINS_TOKEN=${{ secrets.PROD_JENKINS_TOKEN }}" >> $GITHUB_ENV
+            echo "JENKINS_JOB=staging-k8s-discovery-deployment" >> $GITHUB_ENV
+      - name: Trigger Jenkins Deployment
+        run: |
+          echo "Triggering deploy with tag: $DEPLOY_TAG"
+          curl -u ${{ env.JENKINS_TOKEN }} -X POST \
+            "https://${{ env.JENKINS_URL }}/job/${{ env.JENKINS_JOB }}/buildWithParameters?TAG=$DEPLOY_TAG"
+
+  deploy_prod:
+    if: github.event_name == 'push'
+    needs: [build_and_push_image]
+    runs-on: ubuntu-latest
+    env:
+      DEPLOY_TAG: ${{ needs.build_and_push_image.outputs.docker_tag }}
+    steps:
+      - name: Set Jenkins Variables
+        run: |
+            echo "JENKINS_URL=${{ secrets.PROD_JENKINS_URL }}" >> $GITHUB_ENV
+            echo "JENKINS_TOKEN=${{ secrets.PROD_JENKINS_TOKEN }}" >> $GITHUB_ENV
+            echo "JENKINS_JOB=k8s-discovery-deployment" >> $GITHUB_ENV
+      - name: Trigger Jenkins Deployment
+        run: |
+          echo "Triggering deploy with tag: $DEPLOY_TAG"
+          curl -u ${{ env.JENKINS_TOKEN }} -X POST \
+            "https://${{ env.JENKINS_URL }}/job/${{ env.JENKINS_JOB }}/buildWithParameters?TAG=$DEPLOY_TAG"
