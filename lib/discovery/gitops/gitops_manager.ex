@@ -571,20 +571,35 @@ defmodule Discovery.GitOps.GitOpsManager do
   end
 
   defp ensure_repo_cloned(state) do
-    case File.exists?(state.local_path) do
-      true ->
-        # Pull latest changes
+    git_dir = Path.join(state.local_path, ".git")
+
+    cond do
+      File.exists?(git_dir) ->
+        # Directory is a git repo; try pulling latest. If pull reveals repo is broken, reclone.
         case GitAdapter.run_git_cmd(state.local_path, ["pull", "origin", "main"]) do
           {:ok, _} ->
             {:ok, :already_cloned}
 
           {:error, reason} ->
-            Logger.warn("Failed to pull latest changes: #{reason}")
-            # Continue anyway
-            {:ok, :already_cloned}
+            Logger.warning("Failed to pull latest changes: #{reason}")
+
+            if String.contains?(String.downcase(reason), "not a git repository") do
+              Logger.warning("Local path is not a valid git repo; recloning...")
+              File.rm_rf(state.local_path)
+              GitAdapter.clone_repo(state.repo_url, state.local_path, state.token)
+            else
+              {:ok, :already_cloned}
+            end
         end
 
-      false ->
+      File.exists?(state.local_path) ->
+        # Path exists but is not a git repo; clean and clone afresh.
+        Logger.warning("Local path exists without .git; recloning repo at #{state.local_path}")
+        File.rm_rf(state.local_path)
+        GitAdapter.clone_repo(state.repo_url, state.local_path, state.token)
+
+      true ->
+        # Path doesn't exist; fresh clone
         GitAdapter.clone_repo(state.repo_url, state.local_path, state.token)
     end
   end
@@ -593,7 +608,7 @@ defmodule Discovery.GitOps.GitOpsManager do
     if File.exists?(discovery_path) do
       :ok
     else
-      Logger.warn("Discovery folder #{discovery_path} does not exist")
+      Logger.warning("Discovery folder #{discovery_path} does not exist")
       {:error, "Discovery folder not found: #{discovery_path}"}
     end
   end
