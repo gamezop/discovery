@@ -69,7 +69,10 @@ defmodule Discovery.Resources.Deployment do
   end
 
   defp update_labels(map, app) do
-    map = map |> put_in(["spec", "template", "metadata", "labels", "app"], "#{app.app_name}-#{app.uid}")
+    map =
+      map
+      |> put_in(["spec", "template", "metadata", "labels", "app"], "#{app.app_name}-#{app.uid}")
+
     {:ok, map}
   end
 

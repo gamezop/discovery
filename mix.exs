@@ -59,6 +59,7 @@ defmodule Discovery.MixProject do
       {:ex_aws, "~> 2.1", override: true},
       {:ex_aws_s3, "~> 2.0"},
       {:sweet_xml, "~> 0.6"},
+      {:httpoison, "~> 1.8"},
       {:yamlix, git: "https://github.com/ghostdsb/yamlix.git", branch: "master"}
       # {:yamlix, path: "../ext-modules/yamlix"}
     ]

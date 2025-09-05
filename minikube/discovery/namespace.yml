@@ -1,5 +1,0 @@
-## DONOT EDIT UNLESS YOU KNOW WHAT YOU ARE DOING ##
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: discovery

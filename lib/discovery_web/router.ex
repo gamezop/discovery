@@ -35,6 +35,22 @@ defmodule DiscoveryWeb.Router do
     post "/deploy-build", BaseController, :deploy_build
     delete "/delete-app", BaseController, :delete_app
     delete "/delete-deployment", BaseController, :delete_deployment
+
+    # GitOps endpoints
+    post "/gitops/update-image", GitOpsController, :update_image
+    post "/gitops/create-app", GitOpsController, :create_app
+    get "/gitops/apps", GitOpsController, :list_apps
+    get "/gitops/image-tag", GitOpsController, :get_image_tag
+    post "/gitops/sync", GitOpsController, :sync_to_gitops
+    post "/gitops/sync-app", GitOpsController, :sync_app_to_gitops
+    post "/gitops/sync-from-discovery", GitOpsController, :sync_from_discovery_to_gitops
+    post "/gitops/sync-app-from-discovery", GitOpsController, :sync_app_from_discovery_to_gitops
+
+    # CI endpoints
+    scope "/ci" do
+      post "/deploy", CiController, :deploy
+      get "/status", CiController, :status
+    end
   end
 
   # Enables LiveDashboard only for development

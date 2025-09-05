@@ -8,12 +8,15 @@ defmodule Discovery.Application do
   alias Discovery.Controller.DeploymentController
   alias Discovery.Deploy.DeployManager
   alias Discovery.Engine.Builder
+  alias Discovery.GitOps.GitOpsManager
   alias Discovery.Scheduler
   alias Discovery.Utils
 
   require Logger
 
   def start(_type, _args) do
+    git_access_token = Application.get_env(:discovery, :git_access_token)
+
     children = [
       # Start the Telemetry supervisor
       DiscoveryWeb.Telemetry,
@@ -24,6 +27,23 @@ defmodule Discovery.Application do
       {Builder, []},
       {DeploymentController, []},
       {DeployManager, []},
+      {GitOpsManager,
+       [
+         repo_url: "https://github.com/ghostdsb/gitops.git",
+         token: git_access_token,
+         local_path: "/tmp/discovery-gitops",
+         use_pr: false,
+         write_layout: :env_first,
+         env_root_map: %{"dev" => "dev", "staging" => "staging", "prod" => "prod"},
+         base_dir_name: "base",
+         file_names: %{
+           deployment: "deploy.yml",
+           configmap: "configmap.yml",
+           secret: "secret.yml",
+           service: "service.yml",
+           ingress: "ingress.yml"
+         }
+       ]},
       Scheduler
       # Start a worker by calling: Discovery.Worker.start_link(arg)
       # {Discovery.Worker, arg}

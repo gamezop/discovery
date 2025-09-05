@@ -39,4 +39,7 @@ npm-debug.log
 
 /.vscode
 
-dev.env
+/.env
+
+example_workflow.sh
+test_gitops.exs
