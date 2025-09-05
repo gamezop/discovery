@@ -400,6 +400,9 @@ defmodule Discovery.GitOps.GitOpsManager do
              state,
              "feat(ci): deploy #{deployment_name} to #{environment}"
            ) do
+      # Immediately record latest endpoint for clients querying Discovery
+      write_latest_endpoint_to_metadata_db(app_name, deployment_name)
+
       {:ok,
        %{
          deployment_name: deployment_name,
@@ -414,11 +417,39 @@ defmodule Discovery.GitOps.GitOpsManager do
            service:
              relative_from_root(state.local_path, Path.join(app_dir, state.file_names.service))
          },
+         endpoint: computed_endpoint(app_name, deployment_name),
          commit: commit_result
        }}
     else
       {:error, reason} -> {:error, reason}
     end
+  end
+
+  defp computed_endpoint(app_name, deployment_name) do
+    # Keep consistent with ingress host/path used in upsert_ingress_using_resource/4
+    host = "#{app_name}.example.com"
+    "https://#{host}/#{deployment_name}"
+  end
+
+  defp write_latest_endpoint_to_metadata_db(app_name, deployment_name) do
+    # Mirror structure used by Engine.Builder.update_app_metadata/3
+    endpoint = computed_endpoint(app_name, deployment_name)
+    now = DateTime.utc_now()
+
+    current =
+      case :ets.lookup(Discovery.Utils.metadata_db(), app_name) do
+        [{^app_name, m}] -> m
+        _ -> %{}
+      end
+
+    updated =
+      Map.put(current, deployment_name, %{
+        "last_updated" => now,
+        "url" => endpoint
+      })
+
+    :ets.insert(Discovery.Utils.metadata_db(), {app_name, updated})
+    :ok
   end
 
   defp do_ci_status(deployment_name, state) do
