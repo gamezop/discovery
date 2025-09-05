@@ -18,10 +18,10 @@ defmodule Discovery.GitOps.GitAdapter do
     File.rm_rf(local_path)
     File.mkdir_p!(Path.dirname(local_path))
 
-    # Clone with token authentication
-    auth_url = add_token_to_url(repo_url, token)
+    # Use SSH as-is, or HTTPS with token when available
+    clone_url = build_auth_url(repo_url, token)
 
-    case System.cmd("git", ["clone", auth_url, local_path], stderr_to_stdout: true) do
+    case System.cmd("git", ["clone", clone_url, local_path], stderr_to_stdout: true) do
       {output, 0} ->
         Logger.info("Successfully cloned repo to #{local_path}")
         {:ok, %{path: local_path, output: output}}
@@ -60,10 +60,11 @@ defmodule Discovery.GitOps.GitAdapter do
   """
   @spec push_changes(String.t(), String.t(), String.t()) :: git_result
   def push_changes(repo_path, branch, token) do
-    auth_url = add_token_to_url(get_remote_url(repo_path), token)
+    current_remote = get_remote_url(repo_path)
+    desired_remote = build_auth_url(current_remote, token)
 
-    # Set remote URL with token
-    with {:ok, _} <- run_git_cmd(repo_path, ["remote", "set-url", "origin", auth_url]),
+    # Only rewrite remote if we transitioned to an authenticated HTTPS URL
+    with {:ok, _} <- maybe_update_remote(repo_path, current_remote, desired_remote),
          {:ok, output} <- run_git_cmd(repo_path, ["push", "origin", branch]) do
       {:ok, %{branch: branch, output: output}}
     end
@@ -145,10 +146,41 @@ defmodule Discovery.GitOps.GitAdapter do
 
   # Private helper functions
 
-  defp add_token_to_url(url, token) do
-    case String.contains?(url, "github.com") do
-      true -> String.replace(url, "https://github.com/", "https://#{token}@github.com/")
-      false -> url
+  defp build_auth_url(url, token) do
+    cond do
+      is_ssh_url(url) ->
+        url
+
+      token == nil or token == "" ->
+        url
+
+      is_https_github_url(url) ->
+        username = Application.get_env(:discovery, :git_username) || "x-access-token"
+        String.replace(url, "https://github.com/", "https://#{username}:#{token}@github.com/")
+
+      true ->
+        url
+    end
+  end
+
+  defp is_ssh_url(url) do
+    String.starts_with?(url, ["git@", "ssh://"])
+  end
+
+  defp is_https_github_url(url) do
+    String.starts_with?(url, "https://github.com/")
+  end
+
+  defp maybe_update_remote(repo_path, current_remote, desired_remote) do
+    if current_remote == desired_remote do
+      {:ok, :unchanged}
+    else
+      # Do not override SSH remotes
+      if is_ssh_url(current_remote) do
+        {:ok, :ssh_remote_kept}
+      else
+        run_git_cmd(repo_path, ["remote", "set-url", "origin", desired_remote])
+      end
     end
   end
 

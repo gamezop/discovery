@@ -29,7 +29,7 @@ defmodule Discovery.Application do
       {DeployManager, []},
       {GitOpsManager,
        [
-         repo_url: "https://github.com/ghostdsb/gitops.git",
+         repo_url: "git@github.com:ghostdsb/gitops.git",
          token: git_access_token,
          local_path: "/tmp/discovery-gitops",
          use_pr: false,
